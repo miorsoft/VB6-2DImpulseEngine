@@ -7,7 +7,6 @@ Module=modCollision; modCollision.bas
 Module=modImpulseMath; modImpulseMath.bas
 Module=modBody; modBody.bas
 Module=modMAIN; modMAIN.bas
-Module=modMAT2; modMAT2.bas
 Module=modJoints; modJoints.bas
 Module=modMaterials; modMaterials.bas
 Module=modRichClient5; modRichClient5.bas

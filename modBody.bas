@@ -104,6 +104,9 @@ Private Sub CalcCentroid(wB As Long)
             P1 = .Vertex(I)
             p2 = .Vertex(J)
 
+
+
+
             D = Vec2CROSS(P1, p2)
             triangleArea = 0.5 * D
 
@@ -118,6 +121,8 @@ Private Sub CalcCentroid(wB As Long)
             .COM = Vec2ADD(.COM, Vec2MUL(P1, weight))
             .COM = Vec2ADD(.COM, Vec2MUL(p2, weight))
 
+P1 = Vec2SUB(P1, .Pos)
+p2 = Vec2SUB(p2, .Pos)
 
             intx2 = P1.X * P1.X + p2.X * P1.X + p2.X * p2.X
             inty2 = P1.Y * P1.Y + p2.Y * P1.Y + p2.Y * p2.Y
@@ -129,8 +134,7 @@ Private Sub CalcCentroid(wB As Long)
         'com.muli( 1.0f / area );
         .COM = Vec2MUL(.COM, 1 / .Area)
 
-        .ii = .ii / .Area    '-----------<<<<<<<<<<<<<<<< main missing line causing polygons not to rotate
-
+'       .ii = .ii / .Area ^ 0.75 '-----------<<<<<<<<<<<<<<<< main missing line causing polygons not to rotate .... But in original source there isnt !!!???
 
     End With
 
@@ -211,12 +215,12 @@ Public Sub POLYGONComputeFaceNormals(wB As Long)
 '            normals[i].normalize();
 '        }
 
-    If Body(wB).myType <> ePolygon Then Exit Sub
-
     Dim I   As Long
     Dim J   As Long
     Dim face As tVec2
     Dim N   As tVec2
+
+    If Body(wB).myType <> ePolygon Then Exit Sub
 
     With Body(wB)
         ReDim .normals(.Nvertex)
@@ -229,7 +233,6 @@ Public Sub POLYGONComputeFaceNormals(wB As Long)
             .normals(I) = Vec2Normalize(N)
         Next
     End With
-
 
 
 End Sub
@@ -270,19 +273,23 @@ Public Sub CREATERandomPoly(Pos As tVec2, Density As Double)
 
         .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
 
-        .Nvertex = 4 + Rnd * 2
+        .Nvertex = 4 '+ Rnd * 2
 
         ReDim .Vertex(.Nvertex)
         ReDim .tVertex(.Nvertex)
 
-        For I = 1 To .Nvertex
-            '        For I = .Nvertex To 1 Step -1
+'        For I = 1 To .Nvertex
+'            '        For I = .Nvertex To 1 Step -1
+'            .Vertex(I) = Vec2ADD(Pos, _
+'                                 Vec2((10 + Rnd * 30) * Cos(PI2 * (I - 1) / .Nvertex), _
+'                                      (10 + Rnd * 30) * Sin(PI2 * (I - 1) / .Nvertex)))
+'        Next
 
-            .Vertex(I) = Vec2ADD(Pos, _
-                                 Vec2((10 + Rnd * 30) * Cos(PI2 * (I - 1) / .Nvertex), _
-                                      (10 + Rnd * 30) * Sin(PI2 * (I - 1) / .Nvertex)))
-        Next
-
+        .Vertex(1) = Vec2(Pos.X - 20, Pos.Y - 15)
+        .Vertex(2) = Vec2(Pos.X + 40, Pos.Y - 15)
+        .Vertex(3) = Vec2(Pos.X + 40, Pos.Y + 15)
+        .Vertex(4) = Vec2(Pos.X - 20, Pos.Y + 15)
+        
 
     End With
 
@@ -291,8 +298,8 @@ Public Sub CREATERandomPoly(Pos As tVec2, Density As Double)
 
     ComputeMass NofBodies, Density
 
+ Body(NofBodies).Pos = Body(NofBodies).COM 'Vec2SUB(Body(NofBodies).Pos, Body(NofBodies).COM)
 
- Body(NofBodies).COM = Vec2SUB(Body(NofBodies).Pos, Body(NofBodies).COM)
 
 End Sub
 

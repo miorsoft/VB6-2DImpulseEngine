@@ -2,6 +2,8 @@ Attribute VB_Name = "modImpulseMath"
 Option Explicit
 
 
+Public Const DT As Double = 1 / 5   '1 / 60
+Public Const Iterations As Long = 2 ' 4
 
 
 Public Const PI As Double = 3.14159265358979
@@ -23,7 +25,7 @@ Public Const FLT_MAX As Double = 1E+32
 
 Public Const GlobalSTATICFRICTION As Double = 0.75    '0.5
 Public Const GlobalDYNAMICFRICTION As Double = 0.5    '0.3
-Public Const GlobalRestitution As Double = 0.8    '0.8
+Public Const GlobalRestitution As Double = 0.85    '0.8
 
 
 

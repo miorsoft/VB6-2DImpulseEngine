@@ -93,6 +93,13 @@ Private Sub Command1_Click()
         CREATECircle Vec2(I * 55, 50), 5 + Rnd * (20), Density
     Next
 
+'AddJoint 2, 3, 50
+'AddJoint 4, 5, 50
+'AddJoint 6, 7, 50
+'AddJoint 8, 9, 50
+'AddJoint 10, 11, 50
+
+
 
     For I = 20 + 1 To 20 + 9
 
@@ -101,7 +108,7 @@ Private Sub Command1_Click()
         BodySetStatic I
     Next
 
-
+AddJoint 20 + 4, 5, 200
 
     ' AddJoint 1, 2, 50
 

@@ -976,20 +976,20 @@ LabelPolygonPolygon:
 
 
 
-    '  // Clip incident face to reference face side planes
-    '  if(Clip( -sidePlaneNormal, negSide, incidentFace ) < 2)
+    '  // Clip2 incident face to reference face side planes
+    '  if(Clip2( -sidePlaneNormal, negSide, incidentFace ) < 2)
     '    return; // Due to floating point error, possible to not have required points
-    '  if(Clip(  sidePlaneNormal, posSide, incidentFace ) < 2)
+    '  if(Clip2(  sidePlaneNormal, posSide, incidentFace ) < 2)
     '    return; // Due to floating point error, possible to not have required points
     '  // Flip
     '  m->normal = flip ? -refFaceNormal : refFaceNormal;
 
 
     '************** HERE
-    If Clip(Vec2Negative(sidePlaneNormal), negSide, incidentFace) < 2 Then
+    If Clip2(Vec2Negative(sidePlaneNormal), negSide, incidentFace) < 2 Then
         Return
     End If
-    If Clip(sidePlaneNormal, posSide, incidentFace) < 2 Then
+    If Clip2(sidePlaneNormal, posSide, incidentFace) < 2 Then
         Return
     End If
 
@@ -1058,8 +1058,6 @@ LabelPolygonPolygon:
     End If
 
     CollisionSOLVE.contactCount = cp
-
-
 
     Return
 
@@ -1252,7 +1250,7 @@ End Sub
 
 
 
-'int32 Clip( Vec2 n, real c, Vec2 *face )
+'int32 Clip2( Vec2 n, real c, Vec2 *face )
 '{
 '  uint32 sp = 0;
 '  Vec2 out[2] = {
@@ -1265,7 +1263,7 @@ End Sub
 '  real d1 = Dot( n, face[0] ) - c;
 '  real d2 = Dot( n, face[1] ) - c;
 '
-'  // If negative (behind plane) clip
+'  // If negative (behind plane) Clip2
 '  if(d1 <= 0.0f) out[sp++] = face[0];
 '  if(d2 <= 0.0f) out[sp++] = face[1];
 '
@@ -1289,7 +1287,7 @@ End Sub
 
 
 
-Private Function Clip(N As tVec2, C As Double, face() As tVec2) As Long
+Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     Dim sp  As Long
     Dim out(0 To 1) As tVec2
     Dim d1  As Double
@@ -1313,7 +1311,7 @@ Private Function Clip(N As tVec2, C As Double, face() As tVec2) As Long
     d2 = Vec2DOT(N, face(1)) - C
 
 
-    '// If negative (behind plane) clip
+    '// If negative (behind plane) Clip2
     'if(d1 <= 0.0f) out[sp++] = face[0];
     'if(d2 <= 0.0f) out[sp++] = face[1];
     If d1 <= 0 Then out(sp) = face(0): sp = sp + 1
@@ -1339,7 +1337,7 @@ Private Function Clip(N As tVec2, C As Double, face() As tVec2) As Long
     face(1) = out(1)
 
     '    assert( sp != 3 );
-    If sp = 3 Then MsgBox "sp=3"
-    Clip = sp
+''    If sp = 3 Then MsgBox "sp=3"
+    Clip2 = sp
 
 End Function

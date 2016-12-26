@@ -183,6 +183,18 @@ vbDRAW.CC.Fill
     '            FastLine pHDC, x1, y1, x2, y2, 1, vbWhite
     '        End With
     '    Next
+    For I = 1 To NJ
+
+        With Joints(I)
+        x1 = Body(.bA).Pos.X
+        y1 = Body(.bA).Pos.Y
+        x2 = Body(.bB).Pos.X
+        y2 = Body(.bB).Pos.Y
+          vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+
+        End With
+    Next
+        
 
     vbDRAW.Srf.DrawToDC PicHDC
 

@@ -1,8 +1,6 @@
 Attribute VB_Name = "modMAIN"
 Option Explicit
 
-Public Const DT As Double = 1 / 10   '1 / 60
-Public Const Iterations As Long = 4
 
 'Private Declare Function GetTickCount Lib "kernel32" () As Long
 
