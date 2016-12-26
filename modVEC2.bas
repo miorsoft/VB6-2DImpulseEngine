@@ -175,5 +175,57 @@ Public Function SetOrient(radians As Double) As tMAT2
     SetOrient.m10 = S
     SetOrient.m11 = C
 
+
 End Function
 
+
+Public Function VectorProject(ByRef V As tVec2, ByRef Vto As tVec2) As tVec2
+'Poject Vector V to vector Vto
+    Dim K As Double
+    Dim D As Double
+
+
+
+    D = Vto.X * Vto.X + Vto.Y * Vto.Y
+    If D = 0 Then Exit Function
+
+    D = 1 / Sqr(D)
+
+    K = (V.X * Vto.X + V.Y * Vto.Y) * D
+
+    VectorProject.X = (Vto.X * D) * K
+    VectorProject.Y = (Vto.Y * D) * K
+
+End Function
+
+Public Function VectorReflect(ByRef V As tVec2, ByRef wall As tVec2) As tVec2
+'Function returning the reflection of one vector around another.
+'it's used to calculate the rebound of a Vector on another Vector
+'Vector "V" represents current velocity of a point.
+'Vector "Wall" represent the angle of a wall where the point Bounces.
+'Returns the vector velocity that the point takes after the rebound
+
+    Dim vDot As Double
+    Dim D As Double
+    Dim NwX As Double
+    Dim NwY As Double
+
+    D = (wall.X * wall.X + wall.Y * wall.Y)
+    If D = 0 Then Exit Function
+
+    D = 1 / Sqr(D)
+
+    NwX = wall.X * D
+    NwY = wall.Y * D
+    '    'Vect2 = Vect1 - 2 * WallN * (WallN DOT Vect1)
+    'vDot = N.DotV(V)
+    vDot = V.X * NwX + V.Y * NwY
+
+    NwX = NwX * vDot * 2
+    NwY = NwY * vDot * 2
+
+    VectorReflect.X = -V.X + NwX
+    VectorReflect.Y = -V.Y + NwY
+
+
+End Function

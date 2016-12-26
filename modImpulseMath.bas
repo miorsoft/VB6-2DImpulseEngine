@@ -16,15 +16,15 @@ Public Const BIAS_RELATIVE As Double = 0.95
 Public Const BIAS_ABSOLUTE As Double = 0.01
 
 
-Public Const PENETRATION_ALLOWANCE As Double = 0.05   ' 0.05
-Public Const PENETRATION_CORRETION As Double = 0.3    '0.5
+Public Const PENETRATION_ALLOWANCE As Double = 0.01 ' 0.05
+Public Const PENETRATION_CORRETION As Double = 1    '0.5
 
 Public Const MAX_VALUE As Double = 1E+32
 
 Public Const FLT_MAX As Double = 1E+32
 
-Public Const GlobalSTATICFRICTION As Double = 0.75    '0.5
-Public Const GlobalDYNAMICFRICTION As Double = 0.5    '0.3
+Public Const GlobalSTATICFRICTION As Double = 0.4    '0.5
+Public Const GlobalDYNAMICFRICTION As Double = 0.3    '0.3
 Public Const GlobalRestitution As Double = 0.85    '0.8
 
 

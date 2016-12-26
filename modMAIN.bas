@@ -152,8 +152,6 @@ Public Sub doSTEP()
 
 
 
-
-
     For I = 1 To NofBodies
         With Body(I)
             .FORCE.X = 0
@@ -176,7 +174,6 @@ Public Sub doSTEP()
 
                 For J = 1 To .Nvertex
                     V = matMULv(.U, .Vertex(J))
-
                     If V.X < MinX Then MinX = V.X
                     If V.Y < MinY Then MinY = V.Y
                     If V.X > MaxX Then MaxX = V.X
@@ -257,7 +254,9 @@ Private Sub integrateForces(wB As Long)    ', DT As Double)
 
             .angularVelocity = .angularVelocity + .torque * .invInertia * dts
 
-            ' .angularVelocity = .angularVelocity * 0.9997
+            .angularVelocity = .angularVelocity * 0.9999 'Air Resistence
+            .VEL = Vec2MUL(.VEL, 0.9999)
+
 
             'If .Pos.Y + .radius > PicH And .Pos.X - .radius < 0 Then
             If .Pos.Y + .radius > PicH Then
@@ -269,7 +268,7 @@ Private Sub integrateForces(wB As Long)    ', DT As Double)
                     .Pos.X = .Pos.X + PicW
                 Wend
                 .Pos.Y = 0
-
+                .VEL.Y = 0
             End If
 
 
@@ -311,9 +310,9 @@ Private Sub integrateVelocity(wB As Long)    ', DT As Double)
             .Pos = Vec2ADD(.Pos, Vec2MUL(.VEL, DT))
             .orient = .orient + .angularVelocity * DT
 
-            If .myType = ePolygon Then
+            'If .myType = ePolygon Then
                 .U = SetOrient(.orient)
-            End If
+            'End If
 
             'integrateForces wB, DT
 
@@ -392,7 +391,7 @@ Public Sub MAINLOOP()
         'B = 1 + Rnd * (NofBodies - 1)
         'Loop While Body(B).invMass = 0 Or (A = B)
         '
-        'AddJoint A, B, 60
+        'AddDistanceJoint A, B, 60
         'End If
 
     Loop While True

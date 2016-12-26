@@ -141,9 +141,9 @@ Public Sub RENDERrc()
                 Next
                 vbDRAW.CC.Fill
 
-vbDRAW.CC.SetSourceColor 0
-vbDRAW.CC.Ellipse .Pos.X, .Pos.Y, 3, 3
-vbDRAW.CC.Fill
+                vbDRAW.CC.SetSourceColor 0
+                vbDRAW.CC.Ellipse .Pos.X, .Pos.Y, 3, 3
+                vbDRAW.CC.Fill
 
 
 
@@ -161,8 +161,8 @@ vbDRAW.CC.Fill
             For J = 1 To .contactCount
                 x1 = .contactsPTS(J).X
                 y1 = .contactsPTS(J).Y
-       
-                
+
+
                 x2 = x1 + .normal.X * (1 + .penetration * 25)
                 y2 = y1 + .normal.Y * (1 + .penetration * 25)
 
@@ -186,15 +186,27 @@ vbDRAW.CC.Fill
     For I = 1 To NJ
 
         With Joints(I)
-        x1 = Body(.bA).Pos.X
-        y1 = Body(.bA).Pos.Y
-        x2 = Body(.bB).Pos.X
-        y2 = Body(.bB).Pos.Y
-          vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+            Select Case .JointType
+
+                Case JointDistance
+                    x1 = Body(.bA).Pos.X
+                    y1 = Body(.bA).Pos.Y
+                    x2 = Body(.bB).Pos.X
+                    y2 = Body(.bB).Pos.Y
+                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+
+
+                Case JointPINS
+                    x1 = Body(.bA).Pos.X + .tAnchA.X
+                    y1 = Body(.bA).Pos.Y + .tAnchA.Y
+                    x2 = Body(.bB).Pos.X + .tAnchB.X
+                    y2 = Body(.bB).Pos.Y + .tAnchB.Y
+                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+            End Select
 
         End With
     Next
-        
+
 
     vbDRAW.Srf.DrawToDC PicHDC
 

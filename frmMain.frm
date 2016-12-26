@@ -93,24 +93,41 @@ Private Sub Command1_Click()
         CREATECircle Vec2(I * 55, 50), 5 + Rnd * (20), Density
     Next
 
-'AddJoint 2, 3, 50
-'AddJoint 4, 5, 50
-'AddJoint 6, 7, 50
-'AddJoint 8, 9, 50
-'AddJoint 10, 11, 50
+    'AddDistanceJoint 2, 3, 50
+    'AddDistanceJoint 4, 5, 50
+    'AddDistanceJoint 6, 7, 50
+    'AddDistanceJoint 8, 9, 50
+    'AddDistanceJoint 10, 11, 50
 
+    CREATERandomPoly Vec2(300, 150), Density
+    CREATERandomPoly Vec2(350, 150), Density
+
+    AddPinsJoint 21, Vec2(30, 0), 22, Vec2(-30, 0), 80
 
 
     For I = 20 + 1 To 20 + 9
 
         CREATECircle Vec2((I - 20 - 1) * 75, PicH + 40), 65, Density
 
-        BodySetStatic I
+        BodySetStatic NofBodies
     Next
 
-AddJoint 20 + 4, 5, 200
+    AddDistanceJoint 20 + 6, 5, 200
 
-    ' AddJoint 1, 2, 50
+
+
+    '-----------ROPE
+    CREATECircle Vec2(100, 50), 10, Density
+    BodySetStatic NofBodies
+    CREATECircle Vec2(100, 100), 10, Density
+    CREATECircle Vec2(100, 150), 10, Density
+    CREATECircle Vec2(100, 200), 10, Density
+    CREATECircle Vec2(100, 250), 10, Density
+    AddDistanceJoint NofBodies, NofBodies - 1, 50
+    AddDistanceJoint NofBodies - 1, NofBodies - 2, 50
+    AddDistanceJoint NofBodies - 2, NofBodies - 3, 50
+    AddDistanceJoint NofBodies - 3, NofBodies - 4, 50
+
 
     MAINLOOP
 
