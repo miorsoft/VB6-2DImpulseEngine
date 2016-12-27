@@ -2,9 +2,9 @@ Attribute VB_Name = "modImpulseMath"
 Option Explicit
 
 
-Public Const DT As Double = 1 / 5   '1 / 60
-Public Const Iterations As Long = 2 ' 4
-
+Public Const DT As Double = 1 / 20    '1 / 10   '1 / 60
+Public Const Iterations As Long = 5    '10  '2    ' 4
+Public Const DefDensity As Double = 1
 
 Public Const PI As Double = 3.14159265358979
 Public Const PI2 As Double = 6.28318530717959
@@ -16,16 +16,16 @@ Public Const BIAS_RELATIVE As Double = 0.95
 Public Const BIAS_ABSOLUTE As Double = 0.01
 
 
-Public Const PENETRATION_ALLOWANCE As Double = 0.01 ' 0.05
-Public Const PENETRATION_CORRETION As Double = 1    '0.5
+Public Const PENETRATION_ALLOWANCE As Double = 0.05    '0.1   ' 0.05
+Public Const PENETRATION_CORRETION As Double = 0.4    '0.125   '0.4
 
 Public Const MAX_VALUE As Double = 1E+32
 
 Public Const FLT_MAX As Double = 1E+32
 
-Public Const GlobalSTATICFRICTION As Double = 0.4    '0.5
-Public Const GlobalDYNAMICFRICTION As Double = 0.3    '0.3
-Public Const GlobalRestitution As Double = 0.85    '0.8
+Public Const GlobalSTATICFRICTION As Double = 0.6   '0.5
+Public Const GlobalDYNAMICFRICTION As Double = 0.3   '0.3
+Public Const GlobalRestitution As Double = 0.75    '0.8
 
 
 
@@ -35,7 +35,8 @@ Public RESTING As Double
 
 Public Sub InitMATH()
     GRAVITY.X = 0
-    GRAVITY.Y = 0.0625
+    GRAVITY.y = 4 * DT
+
 
     RESTING = Vec2LengthSq(Vec2MUL(GRAVITY, DT)) + EPSILON
 
@@ -85,6 +86,6 @@ End Function
 '  return a >= b * k_biasRelative + a * k_biasAbsolute;
 '}
 Public Function BiasGreaterThan(A As Double, B As Double) As Boolean
-    BiasGreaterThan = (A > (B * BIAS_RELATIVE + A * BIAS_ABSOLUTE))
+    BiasGreaterThan = (A >= (B * BIAS_RELATIVE + A * BIAS_ABSOLUTE))
 End Function
 

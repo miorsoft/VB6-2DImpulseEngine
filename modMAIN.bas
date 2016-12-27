@@ -6,11 +6,17 @@ Option Explicit
 
 Public INVdt As Double
 
-Public RenderMode As Long
 
 Public pHDC As Long
 Public PicW As Long
 Public PicH As Long
+Public Frame As Long
+Public SaveFrames As Long
+
+Public TotalNContacts As Long
+
+Public Version As String
+
 
 'Public DT As Double
 
@@ -40,10 +46,10 @@ Public Sub doSTEP()
     ''       contacts.clear();
     NofContactMainFolds = 0
 
-    For I = 1 To NofBodies - 1
+    For I = 1 To NBodies - 1
         A = Body(I)
 
-        For J = I + 1 To NofBodies
+        For J = I + 1 To NBodies
 
             If (A.invMass <> 0 Or Body(J).invMass <> 0) Then
 
@@ -85,7 +91,7 @@ Public Sub doSTEP()
     '{
     'integrateForces( bodies.get( i ), dt );
     '}
-    For I = 1 To NofBodies
+    For I = 1 To NBodies
         integrateForces I    ', DT
     Next
 
@@ -125,7 +131,7 @@ Public Sub doSTEP()
     '{
     'integrateVelocity( bodies.get( i ), dt );
     '}
-    For I = 1 To NofBodies
+    For I = 1 To NBodies
         integrateVelocity I    ', DT
     Next
 
@@ -152,10 +158,10 @@ Public Sub doSTEP()
 
 
 
-    For I = 1 To NofBodies
+    For I = 1 To NBodies
         With Body(I)
             .FORCE.X = 0
-            .FORCE.Y = 0
+            .FORCE.y = 0
             .torque = 0
 
 
@@ -175,9 +181,9 @@ Public Sub doSTEP()
                 For J = 1 To .Nvertex
                     V = matMULv(.U, .Vertex(J))
                     If V.X < MinX Then MinX = V.X
-                    If V.Y < MinY Then MinY = V.Y
+                    If V.y < MinY Then MinY = V.y
                     If V.X > MaxX Then MaxX = V.X
-                    If V.Y > MaxY Then MaxY = V.Y
+                    If V.y > MaxY Then MaxY = V.y
                     .tVertex(J) = V
                 Next
 
@@ -208,8 +214,8 @@ Private Function AABBvsAABB(wA As Long, wB As Long) As Boolean
     ab1 = Body(wA).AABB
     ab2 = Body(wB).AABB
 
-    If ab1.pMin.Y > ab2.pMax.Y Then Exit Function
-    If ab2.pMin.Y > ab1.pMax.Y Then Exit Function
+    If ab1.pMin.y > ab2.pMax.y Then Exit Function
+    If ab2.pMin.y > ab1.pMax.y Then Exit Function
     If ab1.pMin.X > ab2.pMax.X Then Exit Function
     If ab2.pMin.X > ab1.pMax.X Then Exit Function
 
@@ -254,12 +260,12 @@ Private Sub integrateForces(wB As Long)    ', DT As Double)
 
             .angularVelocity = .angularVelocity + .torque * .invInertia * dts
 
-            .angularVelocity = .angularVelocity * 0.9999 'Air Resistence
+            .angularVelocity = .angularVelocity * 0.9999    'Air Resistence
             .VEL = Vec2MUL(.VEL, 0.9999)
 
 
             'If .Pos.Y + .radius > PicH And .Pos.X - .radius < 0 Then
-            If .Pos.Y + .radius > PicH Then
+            If .Pos.y + .radius > PicH Then
 
                 While .Pos.X > PicW
                     .Pos.X = .Pos.X - PicW
@@ -267,8 +273,8 @@ Private Sub integrateForces(wB As Long)    ', DT As Double)
                 While .Pos.X < 0
                     .Pos.X = .Pos.X + PicW
                 Wend
-                .Pos.Y = 0
-                .VEL.Y = 0
+                .Pos.y = 0
+                .VEL.y = 0
             End If
 
 
@@ -311,7 +317,7 @@ Private Sub integrateVelocity(wB As Long)    ', DT As Double)
             .orient = .orient + .angularVelocity * DT
 
             'If .myType = ePolygon Then
-                .U = SetOrient(.orient)
+            .U = SetOrient(.orient)
             'End If
 
             'integrateForces wB, DT
@@ -327,7 +333,7 @@ End Sub
 Public Sub MAINLOOP()
     Dim CNT As Long
 
-    Dim dct As Long
+
 
     Dim I   As Long
 
@@ -355,27 +361,22 @@ Public Sub MAINLOOP()
         doSTEP
 
 
-        If CNT Mod 20 = 0 Then
-
-
-
-            '            BitBlt pHDC, 0, 0, PicW, PicH, pHDC, 0, 0, vbBlack
-            '            RENDER RenderMode
+        If CNT Mod 50 = 0 Then
 
             RENDERrc
+            frmMain.PIC.Refresh
 
 
-
-
-            dct = 0
+            TotalNContacts = 0
             For I = 1 To NofContactMainFolds
-                dct = dct + Contacts(I).contactCount
+                TotalNContacts = TotalNContacts + Contacts(I).contactCount
             Next
-            frmMain.PIC.CurrentY = 2
 
-            frmMain.PIC.Print "Objects: " & NofBodies & "   Contacts: " & dct
-            frmMain.PIC.Refresh: DoEvents
 
+            If SaveFrames Then
+                vbDRAW.Srf.WriteContentToJpgFile App.Path & "\Frames\" & Format(Frame, "00000") & ".jpg", JPGQuality
+                Frame = Frame + 1
+            End If
 
         End If
 
@@ -385,10 +386,10 @@ Public Sub MAINLOOP()
 
         'If Rnd < 0.0001 Then
         'Do
-        'A = 1 + Rnd * (NofBodies - 1)
+        'A = 1 + Rnd * (NBodies - 1)
         'Loop While Body(A).invMass = 0
         'Do
-        'B = 1 + Rnd * (NofBodies - 1)
+        'B = 1 + Rnd * (NBodies - 1)
         'Loop While Body(B).invMass = 0 Or (A = B)
         '
         'AddDistanceJoint A, B, 60

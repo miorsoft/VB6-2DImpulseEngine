@@ -19,6 +19,7 @@ Attribute CONS.VB_VarUserMemId = 1610809344
 Public PicHDC As Long
 Attribute PicHDC.VB_VarUserMemId = 1073741828
 
+Public Const JPGQuality As Long = 95
 
 
 Public Sub InitRC()
@@ -48,8 +49,7 @@ Public Sub InitRC()
         .CC.SetLineWidth 1, True
 
 
-        .CC.SelectFont "Courier New", 9, vbWhite
-
+        .CC.SelectFont "Courier New", 9, vbGreen
 
     End With
 
@@ -71,8 +71,59 @@ Public Sub UnloadRC()
     CONS.CleanupRichClientDll
 End Sub
 
+Public Sub CreateIntroFrames()
+    vbDRAW.CC.SetSourceColor 0
+    vbDRAW.CC.Paint
+
+    StringOut "                               "
+    StringOut "2D-Impulse-Engine:   (V" & Version & ")"
+    StringOut "                               "
+    StringOut "VB6 Port of Randy Gaul Impulse Engine.  "
+    StringOut "                               "
+    StringOut "Parameters:"
+    StringOut "Delta time: " & DT
+    StringOut "Iterations: " & Iterations
+    StringOut "G. Static  Friction: " & GlobalSTATICFRICTION
+    StringOut "G. Dynamic Friction: " & GlobalDYNAMICFRICTION
+    StringOut "Restitution: " & GlobalRestitution
+    StringOut "                               "
+    StringOut "port to VB6 & Joints by MiorSoft"
+    StringOut "                               "
+    StringOut "                               "
+
+End Sub
+Public Sub CreateOuttroFrames()
+    vbDRAW.CC.SetSourceColor 0
+    vbDRAW.CC.Paint
+
+    StringOut "                               "
+    StringOut "                                Thanks for watching !"
+    StringOut "                               "
+    StringOut "                               "
+
+End Sub
+Private Sub StringOut(S As String)
+    Dim I   As Double
+    Const sstep As Double = 2
+    Static y As Double
+    Dim S2  As String
+
+    Do
+        S = S & " "
+    Loop While (Len(S) - 1) Mod sstep <> 0
+
+    S2 = S
+
+    For I = 1 To Len(S2) Step sstep
+        vbDRAW.CC.TextOut 10 + I * 7, y, Mid$(S, I, sstep)
+        vbDRAW.Srf.WriteContentToJpgFile App.Path & "\Frames\" & Format(Frame, "00000") & ".jpg", JPGQuality
+        Frame = Frame + 1
+    Next
+    y = y + 16
 
 
+
+End Sub
 Public Sub RENDERrc()
     Dim x1  As Long
     Dim y1  As Long
@@ -95,13 +146,13 @@ Public Sub RENDERrc()
     vbDRAW.CC.SetLineWidth 1.25
 
 
-    For I = 1 To NofBodies
+    For I = 1 To NBodies
 
         With Body(I)
 
             If .myType = eCircle Then
                 x1 = .Pos.X
-                y1 = .Pos.Y
+                y1 = .Pos.y
 
                 vbDRAW.CC.SetSourceColor .color
                 vbDRAW.CC.Ellipse x1, y1, .radius * 2, .radius * 2
@@ -110,7 +161,7 @@ Public Sub RENDERrc()
                 x2 = x1 + .radius * Cos(.orient)
                 y2 = y1 + .radius * Sin(.orient)
 
-                vbDRAW.CC.DrawLine x1, y1, x2, y2, , , 0    '.color
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , , 0, 0.5    '.color
 
 
             Else
@@ -129,11 +180,11 @@ Public Sub RENDERrc()
                 vbDRAW.CC.SetSourceColor .color
 
                 x1 = .tVertex(1).X + .Pos.X
-                y1 = .tVertex(1).Y + .Pos.Y
+                y1 = .tVertex(1).y + .Pos.y
                 vbDRAW.CC.MoveTo x1, y1
                 For J = 2 To .Nvertex
                     x1 = .tVertex(J).X + .Pos.X
-                    y1 = .tVertex(J).Y + .Pos.Y
+                    y1 = .tVertex(J).y + .Pos.y
                     '                    JJ = J + 1: If JJ > .Nvertex Then JJ = 1
                     '                    x2 = .tVertex(JJ).X + .Pos.X
                     '                    y2 = .tVertex(JJ).Y + .Pos.Y
@@ -141,8 +192,8 @@ Public Sub RENDERrc()
                 Next
                 vbDRAW.CC.Fill
 
-                vbDRAW.CC.SetSourceColor 0
-                vbDRAW.CC.Ellipse .Pos.X, .Pos.Y, 3, 3
+                vbDRAW.CC.SetSourceColor 0, 0.5
+                vbDRAW.CC.Ellipse .Pos.X, .Pos.y, 3, 3
                 vbDRAW.CC.Fill
 
 
@@ -155,22 +206,22 @@ Public Sub RENDERrc()
     Next
 
 
-    '    ' DRAW Contact Points
-    For I = 1 To NofContactMainFolds
-        With Contacts(I)
-            For J = 1 To .contactCount
-                x1 = .contactsPTS(J).X
-                y1 = .contactsPTS(J).Y
-
-
-                x2 = x1 + .normal.X * (1 + .penetration * 25)
-                y2 = y1 + .normal.Y * (1 + .penetration * 25)
-
-                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 2, vbBlue, 0.5
-            Next
-        End With
-
-    Next
+    '    ' DRAW Contact Points----------------------------------------------------------------------
+    '    For I = 1 To NofContactMainFolds
+    '        With Contacts(I)
+    '            For J = 1 To .contactCount
+    '                x1 = .contactsPTS(J).X
+    '                y1 = .contactsPTS(J).Y
+    '
+    '
+    '                x2 = x1 + .normal.X * (1 + .penetration * 25)
+    '                y2 = y1 + .normal.Y * (1 + .penetration * 25)
+    '
+    '                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 2, vbBlue, 0.5
+    '            Next
+    '        End With
+    '    Next
+    '    -------------------------------------------------------------------------------------------
 
 
 
@@ -190,23 +241,36 @@ Public Sub RENDERrc()
 
                 Case JointDistance
                     x1 = Body(.bA).Pos.X
-                    y1 = Body(.bA).Pos.Y
+                    y1 = Body(.bA).Pos.y
                     x2 = Body(.bB).Pos.X
-                    y2 = Body(.bB).Pos.Y
+                    y2 = Body(.bB).Pos.y
                     vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
 
 
-                Case JointPINS
+                Case Joint2Pins
                     x1 = Body(.bA).Pos.X + .tAnchA.X
-                    y1 = Body(.bA).Pos.Y + .tAnchA.Y
+                    y1 = Body(.bA).Pos.y + .tAnchA.y
                     x2 = Body(.bB).Pos.X + .tAnchB.X
-                    y2 = Body(.bB).Pos.Y + .tAnchB.Y
+                    y2 = Body(.bB).Pos.y + .tAnchB.y
                     vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+
+                Case JointPin
+                    x1 = .AnchB.X
+                    y1 = .AnchB.y
+                    x2 = Body(.bA).Pos.X + .tAnchA.X
+                    y2 = Body(.bA).Pos.y + .tAnchA.y
+                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+                    vbDRAW.CC.SetSourceColor vbRed, 0.5
+                    vbDRAW.CC.Ellipse x1, y1, 5, 5
+                    vbDRAW.CC.Fill
             End Select
 
         End With
     Next
 
+    vbDRAW.CC.TextOut 5, 5, "2D-Impulse-Engine by MiorSoft V" & Version & "   Objects: " & NBodies & "   Contacts: " & TotalNContacts
+
+    DoEvents
 
     vbDRAW.Srf.DrawToDC PicHDC
 

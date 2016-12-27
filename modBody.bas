@@ -63,7 +63,7 @@ End Type
 
 
 Public Body() As tBody
-Public NofBodies As Long
+Public NBodies As Long
 
 
 
@@ -94,7 +94,7 @@ Private Sub CalcCentroid(wB As Long)
 
         .ii = 0
         .COM.X = 0
-        .COM.Y = 0
+        .COM.y = 0
         .Area = 0
 
         For I = 1 To .Nvertex
@@ -121,11 +121,11 @@ Private Sub CalcCentroid(wB As Long)
             .COM = Vec2ADD(.COM, Vec2MUL(P1, weight))
             .COM = Vec2ADD(.COM, Vec2MUL(p2, weight))
 
-P1 = Vec2SUB(P1, .Pos)
-p2 = Vec2SUB(p2, .Pos)
+            P1 = Vec2SUB(P1, .Pos)
+            p2 = Vec2SUB(p2, .Pos)
 
             intx2 = P1.X * P1.X + p2.X * P1.X + p2.X * p2.X
-            inty2 = P1.Y * P1.Y + p2.Y * P1.Y + p2.Y * p2.Y
+            inty2 = P1.y * P1.y + p2.y * P1.y + p2.y * p2.y
 
             .ii = .ii + (0.25 * k_inv3 * D) * (intx2 + inty2)
 
@@ -134,7 +134,7 @@ p2 = Vec2SUB(p2, .Pos)
         'com.muli( 1.0f / area );
         .COM = Vec2MUL(.COM, 1 / .Area)
 
-'       .ii = .ii / .Area ^ 0.75 '-----------<<<<<<<<<<<<<<<< main missing line causing polygons not to rotate .... But in original source there isnt !!!???
+        '       .ii = .ii / .Area ^ 0.75 '-----------<<<<<<<<<<<<<<<< main missing line causing polygons not to rotate .... But in original source there isnt !!!???
 
     End With
 
@@ -228,8 +228,8 @@ Public Sub POLYGONComputeFaceNormals(wB As Long)
             J = I + 1
             If J > .Nvertex Then J = 1
             face = Vec2SUB(.Vertex(J), .Vertex(I))
-            N.X = face.Y
-            N.Y = -face.X
+            N.X = face.y
+            N.y = -face.X
             .normals(I) = Vec2Normalize(N)
         Next
     End With
@@ -237,9 +237,9 @@ Public Sub POLYGONComputeFaceNormals(wB As Long)
 
 End Sub
 Public Sub CREATECircle(Pos As tVec2, r As Double, Density As Double)
-    NofBodies = NofBodies + 1
-    ReDim Preserve Body(NofBodies)
-    With Body(NofBodies)
+    NBodies = NBodies + 1
+    ReDim Preserve Body(NBodies)
+    With Body(NBodies)
         .myType = eCircle
         .Pos = Pos
         .radius = r
@@ -247,21 +247,23 @@ Public Sub CREATECircle(Pos As tVec2, r As Double, Density As Double)
         .dynamicFriction = GlobalDYNAMICFRICTION    ' 0.5 '0.07    ' 0.1    '0.3
         .Restitution = GlobalRestitution
         .orient = rndFT(-PI, PI)
-         .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
-
+        .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
+        .U = SetOrient(0)
+        .VEL = Vec2(0, 0)
+        .angularVelocity = 0
     End With
 
 
-    ComputeMass NofBodies, Density
+    ComputeMass NBodies, Density
 End Sub
 
 Public Sub CREATERandomPoly(Pos As tVec2, Density As Double)
     Dim I   As Long
 
 
-    NofBodies = NofBodies + 1
-    ReDim Preserve Body(NofBodies)
-    With Body(NofBodies)
+    NBodies = NBodies + 1
+    ReDim Preserve Body(NBodies)
+    With Body(NBodies)
         .myType = ePolygon
 
         .Pos = Pos
@@ -273,35 +275,73 @@ Public Sub CREATERandomPoly(Pos As tVec2, Density As Double)
 
         .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
 
-        .Nvertex = 4 '+ Rnd * 2
+        .Nvertex = 4    '+ Rnd * 2
 
         ReDim .Vertex(.Nvertex)
         ReDim .tVertex(.Nvertex)
 
-'        For I = 1 To .Nvertex
-'            '        For I = .Nvertex To 1 Step -1
-'            .Vertex(I) = Vec2ADD(Pos, _
-'                                 Vec2((10 + Rnd * 30) * Cos(PI2 * (I - 1) / .Nvertex), _
-'                                      (10 + Rnd * 30) * Sin(PI2 * (I - 1) / .Nvertex)))
-'        Next
+        '        For I = 1 To .Nvertex
+        '            '        For I = .Nvertex To 1 Step -1
+        '            .Vertex(I) = Vec2ADD(Pos, _
+                     '                                 Vec2((10 + Rnd * 30) * Cos(PI2 * (I - 1) / .Nvertex), _
+                     '                                      (10 + Rnd * 30) * Sin(PI2 * (I - 1) / .Nvertex)))
+        '        Next
 
-        .Vertex(1) = Vec2(Pos.X - 20, Pos.Y - 15)
-        .Vertex(2) = Vec2(Pos.X + 40, Pos.Y - 15)
-        .Vertex(3) = Vec2(Pos.X + 40, Pos.Y + 15)
-        .Vertex(4) = Vec2(Pos.X - 20, Pos.Y + 15)
-        
+        .Vertex(1) = Vec2(Pos.X - 20, Pos.y - 15)
+        .Vertex(2) = Vec2(Pos.X + 40, Pos.y - 15)
+        .Vertex(3) = Vec2(Pos.X + 40, Pos.y + 15)
+        .Vertex(4) = Vec2(Pos.X - 20, Pos.y + 15)
+
 
     End With
 
 
-    POLYGONComputeFaceNormals NofBodies
-
-    ComputeMass NofBodies, Density
-
- Body(NofBodies).Pos = Body(NofBodies).COM 'Vec2SUB(Body(NofBodies).Pos, Body(NofBodies).COM)
+    POLYGONComputeFaceNormals NBodies
+    ComputeMass NBodies, Density
+    Body(NBodies).Pos = Body(NBodies).COM
 
 
 End Sub
+
+
+Public Sub CreateBox(W As Double, H As Double, Pos As tVec2, Optional Ang As Double = 0)
+    Dim I   As Long
+
+
+    NBodies = NBodies + 1
+    ReDim Preserve Body(NBodies)
+    With Body(NBodies)
+        .myType = ePolygon
+
+        .Pos = Pos
+        .staticFriction = GlobalSTATICFRICTION   '0.5
+        .dynamicFriction = GlobalDYNAMICFRICTION    '0.3
+        .Restitution = GlobalRestitution
+
+        .orient = Ang
+        .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
+        .Nvertex = 4    '+ Rnd * 2
+
+        .U = SetOrient(Ang)
+        .VEL = Vec2(0, 0)
+        .angularVelocity = 0
+
+        ReDim .Vertex(.Nvertex)
+        ReDim .tVertex(.Nvertex)
+
+        .Vertex(1) = Vec2(Pos.X - W * 0.5, Pos.y - H * 0.5)
+        .Vertex(2) = Vec2(Pos.X + W * 0.5, Pos.y - H * 0.5)
+        .Vertex(3) = Vec2(Pos.X + W * 0.5, Pos.y + H * 0.5)
+        .Vertex(4) = Vec2(Pos.X - W * 0.5, Pos.y + H * 0.5)
+
+    End With
+
+    POLYGONComputeFaceNormals NBodies
+    ComputeMass NBodies, DefDensity
+    Body(NBodies).Pos = Body(NBodies).COM
+
+End Sub
+
 
 
 '  // The extreme point along a direction within a polygon

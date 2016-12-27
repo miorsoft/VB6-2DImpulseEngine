@@ -19,28 +19,36 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   862
    StartUpPosition =   3  'Windows Default
+   Begin VB.CheckBox chkJPG 
+      Caption         =   "Save Jpg Frames"
+      Height          =   495
+      Left            =   11160
+      TabIndex        =   6
+      Top             =   4560
+      Width           =   1455
+   End
    Begin VB.CommandButton Command3 
-      Caption         =   "add poly"
+      Caption         =   "add Brick"
       Height          =   495
       Left            =   11040
       TabIndex        =   4
-      Top             =   2880
-      Width           =   855
+      Top             =   3480
+      Width           =   975
    End
-   Begin VB.ComboBox cmbDrawMode 
+   Begin VB.ComboBox cmbScene 
       Height          =   315
       Left            =   11040
       Style           =   2  'Dropdown List
       TabIndex        =   3
-      Top             =   2040
-      Width           =   1095
+      Top             =   1680
+      Width           =   1335
    End
    Begin VB.CommandButton Command2 
       Caption         =   "add circle"
       Height          =   495
       Left            =   11040
       TabIndex        =   2
-      Top             =   1200
+      Top             =   2760
       Width           =   975
    End
    Begin VB.CommandButton Command1 
@@ -65,6 +73,14 @@ Begin VB.Form frmMain
       Top             =   120
       Width           =   9615
    End
+   Begin VB.Label Label1 
+      Caption         =   "SCENE"
+      Height          =   255
+      Left            =   11040
+      TabIndex        =   5
+      Top             =   1440
+      Width           =   1095
+   End
 End
 Attribute VB_Name = "frmMain"
 Attribute VB_GlobalNameSpace = False
@@ -74,62 +90,25 @@ Attribute VB_Exposed = False
 Option Explicit
 
 
-Private Const Density As Double = 1
 
-Private Sub cmbDrawMode_Click()
-    RenderMode = cmbDrawMode.ListIndex
+
+
+Private Sub chkJPG_Click()
+    SaveFrames = (chkJPG.Value = vbChecked)
+End Sub
+
+Private Sub cmbScene_Change()
+    CreateScene frmMain.cmbScene.ListIndex
+End Sub
+
+Private Sub cmbScene_Click()
+    CreateScene frmMain.cmbScene.ListIndex
 End Sub
 
 Private Sub Command1_Click()
 
 
-    Dim I   As Long
-
-    NofBodies = 0
-    NJ = 0
-
-
-    For I = 1 To 20
-        CREATECircle Vec2(I * 55, 50), 5 + Rnd * (20), Density
-    Next
-
-    'AddDistanceJoint 2, 3, 50
-    'AddDistanceJoint 4, 5, 50
-    'AddDistanceJoint 6, 7, 50
-    'AddDistanceJoint 8, 9, 50
-    'AddDistanceJoint 10, 11, 50
-
-    CREATERandomPoly Vec2(300, 150), Density
-    CREATERandomPoly Vec2(350, 150), Density
-
-    AddPinsJoint 21, Vec2(30, 0), 22, Vec2(-30, 0), 80
-
-
-    For I = 20 + 1 To 20 + 9
-
-        CREATECircle Vec2((I - 20 - 1) * 75, PicH + 40), 65, Density
-
-        BodySetStatic NofBodies
-    Next
-
-    AddDistanceJoint 20 + 6, 5, 200
-
-
-
-    '-----------ROPE
-    CREATECircle Vec2(100, 50), 10, Density
-    BodySetStatic NofBodies
-    CREATECircle Vec2(100, 100), 10, Density
-    CREATECircle Vec2(100, 150), 10, Density
-    CREATECircle Vec2(100, 200), 10, Density
-    CREATECircle Vec2(100, 250), 10, Density
-    AddDistanceJoint NofBodies, NofBodies - 1, 50
-    AddDistanceJoint NofBodies - 1, NofBodies - 2, 50
-    AddDistanceJoint NofBodies - 2, NofBodies - 3, 50
-    AddDistanceJoint NofBodies - 3, NofBodies - 4, 50
-
-
-    MAINLOOP
+    CreateScene frmMain.cmbScene.ListIndex
 
 
 
@@ -137,17 +116,28 @@ Private Sub Command1_Click()
 End Sub
 
 Private Sub Command2_Click()
-    CREATECircle Vec2(PicW * 0.5, 0), 5 + Rnd * 20, Density
+    CREATECircle Vec2(PicW * 0.5, 0), 5 + Rnd * 20, DefDensity
 End Sub
 
 Private Sub Command3_Click()
 
 
-    CREATERandomPoly Vec2(PicW \ 2, 0), Density
+'    CREATERandomPoly Vec2(PicW \ 2, 0), DefDensity
+    CreateBox 60, 30, Vec2(PicW \ 2, 0)
 
 End Sub
 
+Private Sub Form_Activate()
+
+
+    MAINLOOP
+End Sub
+
 Private Sub Form_Load()
+
+
+    If Dir(App.Path & "\Frames", vbDirectory) = vbNullString Then MkDir App.Path & "\Frames"
+    If Dir(App.Path & "\Frames\*.*") <> vbNullString Then Kill App.Path & "\Frames\*.*"
 
     PIC.Height = 360
     PIC.Width = Int(PIC.Height * 16 / 9)
@@ -162,12 +152,29 @@ Private Sub Form_Load()
     InitMaterials
 
 
-    cmbDrawMode.AddItem "API"
-    cmbDrawMode.AddItem "Antialias"
-    cmbDrawMode.ListIndex = 0
+    cmbScene.AddItem "First"
+    cmbScene.AddItem "Distance Joints"
+    cmbScene.AddItem "1 Pin Joints"
+    cmbScene.AddItem "2 Pins Joints"
+    cmbScene.AddItem "2 Pins Joints II"
+
+
+    cmbScene.ListIndex = 0
 
     Randomize Timer
     InitRC
+
+
+    CreateScene 0
+
+    Version = App.Major & "." & App.Minor & "." & App.Revision
+    CreateIntroFrames
+
+
+End Sub
+
+Private Sub Form_QueryUnload(Cancel As Integer, UnloadMode As Integer)
+    CreateOuttroFrames
 
 End Sub
 

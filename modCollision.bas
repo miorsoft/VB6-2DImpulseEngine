@@ -235,7 +235,6 @@ Public Sub contactsApplyImpulse(wC As Long)
                     BodyApplyImpulse B, impulse, rB
 
 
-
                     '          // Friction impulse
                     '          // rv = B->velocity + Cross( B->angularVelocity, rb ) -
                     '          // A->velocity - Cross( A->angularVelocity, ra );
@@ -546,7 +545,7 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
     Dim radius As Double
     Dim distance As Double
 
-    Dim center As tVec2
+    Dim Center As tVec2
 
 
     Dim separation As Double
@@ -629,7 +628,7 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
                     ' m.contacts[0].set( a.position );
                     CollisionSOLVE.penetration = A.radius
                     CollisionSOLVE.normal.X = 1
-                    CollisionSOLVE.normal.Y = 0
+                    CollisionSOLVE.normal.y = 0
                     'ReDim CollisionSOLVE.contactsPTS(1)
                     CollisionSOLVE.contactsPTS(1) = A.Pos
 
@@ -695,7 +694,7 @@ LABELCirclePolygon:
     '// center = B->u.Transpose( ) * (center - b->position);
     'Vec2 center = B.u.transpose().muli( a.position.sub( b.position ) );
 
-    center = matMULv(matTranspose(B.U), Vec2SUB(A.Pos, B.Pos))
+    Center = matMULv(matTranspose(B.U), Vec2SUB(A.Pos, B.Pos))
 
 
 
@@ -711,7 +710,7 @@ LABELCirclePolygon:
         '// real s = Dot( B->m_normals[i], center - B->m_vertices[i] );
         'float s = Vec2.dot( B.normals[i], center.sub( B.vertices[i] ) );
 
-        S = Vec2DOT(B.normals(I), Vec2SUB(center, B.Vertex(I)))
+        S = Vec2DOT(B.normals(I), Vec2SUB(Center, B.Vertex(I)))
         '    if(s > A->radius)
         '      return;
         '    if(s > separation)
@@ -777,8 +776,8 @@ LABELCirclePolygon:
     'float dot2 = Vec2.dot( center.sub( v2 ), v1.sub( v2 ) );
     'm.penetration = A.radius - separation;
 
-    Dot1 = Vec2DOT(Vec2SUB(center, v1), Vec2SUB(v2, v1))
-    Dot2 = Vec2DOT(Vec2SUB(center, v2), Vec2SUB(v1, v2))
+    Dot1 = Vec2DOT(Vec2SUB(Center, v1), Vec2SUB(v2, v1))
+    Dot2 = Vec2DOT(Vec2SUB(Center, v2), Vec2SUB(v1, v2))
     CollisionSOLVE.penetration = A.radius - separation
 
 
@@ -804,11 +803,11 @@ LABELCirclePolygon:
     '        }
     If Dot1 <= 0 Then
 
-        If Vec2DISTANCEsq(center, v1) < A.radius * A.radius Then
+        If Vec2DISTANCEsq(Center, v1) < A.radius * A.radius Then
 
             CollisionSOLVE.contactCount = 1
             'ReDim CollisionSOLVE.contactsPTS(1)
-            N = Vec2SUB(v1, center)
+            N = Vec2SUB(v1, Center)
             CollisionSOLVE.normal = Vec2Normalize(matMULv(B.U, N))
             v1 = Vec2ADD(matMULv(B.U, v1), B.Pos)
             CollisionSOLVE.contactsPTS(1) = v1
@@ -836,11 +835,11 @@ LABELCirclePolygon:
         '                B.u.muli( m.normal.set( v2 ).subi( center ) ).normalize();
         '                B.u.mul( v2, m.contacts[0] ).addi( b.position );
         '                }
-        If Vec2DISTANCEsq(center, v2) < A.radius * A.radius Then
+        If Vec2DISTANCEsq(Center, v2) < A.radius * A.radius Then
 
             CollisionSOLVE.contactCount = 1
             ' ReDim CollisionSOLVE.contactsPTS(1)
-            N = Vec2SUB(v2, center)
+            N = Vec2SUB(v2, Center)
             v2 = Vec2ADD(matMULv(B.U, v2), B.Pos)
             CollisionSOLVE.contactsPTS(1) = v2
             CollisionSOLVE.normal = Vec2Normalize(matMULv(B.U, N))
@@ -871,7 +870,7 @@ LABELCirclePolygon:
 
 
         N = B.normals(faceNormal)
-        If Vec2DOT(Vec2SUB(center, v1), N) < A.radius Then
+        If Vec2DOT(Vec2SUB(Center, v1), N) < A.radius Then
 
             N = matMULv(B.U, N)
             CollisionSOLVE.normal = Vec2Negative(N)
@@ -960,8 +959,8 @@ LabelPolygonPolygon:
     '  // Orthogonalize
     '  Vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
     sidePlaneNormal = Vec2Normalize(Vec2SUB(v2, v1))
-    refFaceNormal.X = sidePlaneNormal.Y
-    refFaceNormal.Y = -sidePlaneNormal.X
+    refFaceNormal.X = sidePlaneNormal.y
+    refFaceNormal.y = -sidePlaneNormal.X
 
 
 
@@ -1337,7 +1336,7 @@ Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     face(1) = out(1)
 
     '    assert( sp != 3 );
-''    If sp = 3 Then MsgBox "sp=3"
+    ''    If sp = 3 Then MsgBox "sp=3"
     Clip2 = sp
 
 End Function
