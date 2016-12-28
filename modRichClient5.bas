@@ -81,11 +81,14 @@ Public Sub CreateIntroFrames()
     StringOut "VB6 Port of Randy Gaul Impulse Engine.  "
     StringOut "                               "
     StringOut "Parameters:"
-    StringOut "Delta time: " & DT
-    StringOut "Iterations: " & Iterations
-    StringOut "G. Static  Friction: " & GlobalSTATICFRICTION
-    StringOut "G. Dynamic Friction: " & GlobalDYNAMICFRICTION
+    StringOut "Delta time:  " & DT
+    StringOut "Iterations:  " & Iterations
+    StringOut "G. Static  Friction:   " & GlobalSTATICFRICTION
+    StringOut "G. Dynamic Friction:   " & GlobalDYNAMICFRICTION
     StringOut "Restitution: " & GlobalRestitution
+    StringOut "Penetration Allowance: " & PENETRATION_ALLOWANCE
+    StringOut "Penetration Corretion: " & PENETRATION_CORRETION
+    StringOut "Epsilon:     " & EPSILON
     StringOut "                               "
     StringOut "port to VB6 & Joints by MiorSoft"
     StringOut "                               "
@@ -104,7 +107,7 @@ Public Sub CreateOuttroFrames()
 End Sub
 Private Sub StringOut(S As String)
     Dim I   As Double
-    Const sstep As Double = 2
+    Const sstep As Double = 3
     Static y As Double
     Dim S2  As String
 
@@ -161,7 +164,7 @@ Public Sub RENDERrc()
                 x2 = x1 + .radius * Cos(.orient)
                 y2 = y1 + .radius * Sin(.orient)
 
-                vbDRAW.CC.DrawLine x1, y1, x2, y2, , , 0, 0.5    '.color
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , , 0, 0.25
 
 
             Else
@@ -192,12 +195,11 @@ Public Sub RENDERrc()
                 Next
                 vbDRAW.CC.Fill
 
-                vbDRAW.CC.SetSourceColor 0, 0.5
+                vbDRAW.CC.SetSourceColor 0, 0.25
                 vbDRAW.CC.Ellipse .Pos.X, .Pos.y, 3, 3
                 vbDRAW.CC.Fill
 
-
-
+                If .Nvertex > 4 Then vbDRAW.CC.DrawLine x1, y1, .Pos.X, .Pos.y, , , 0, 0.25
 
             End If
 

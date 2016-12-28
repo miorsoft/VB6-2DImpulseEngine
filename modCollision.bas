@@ -21,6 +21,8 @@ Public Type tManifold
 
     contactsPTS(1 To 2) As tVec2
     contactCount As Long
+    invContactCount As Double
+    
     MAXcontactCount As Long
 
     e       As Double
@@ -85,7 +87,6 @@ Public Sub ContactsINIT(wC As Long)
             rV = Vec2SUB(rV, Vec2CROSSav(Body(A).angularVelocity, rA))
 
 
-
             '            // Determine if we should perform a resting collision or not
             '            // The idea is if the only thing moving this object is gravity,
             '            // then the collision should be performed without any restitution
@@ -94,6 +95,7 @@ Public Sub ContactsINIT(wC As Long)
             '            {
             '            e = 0.0f;
             '            }
+            
             If Vec2LengthSq(rV) < RESTING Then .e = 0
         Next
 
@@ -125,8 +127,9 @@ Public Sub contactsPositionalCorrection(wC As Long)
         correction = (Max(.penetration - PENETRATION_ALLOWANCE, 0) / (Body(.bodyA).invMass + Body(.bodyB).invMass)) _
                      * PENETRATION_CORRETION
 
-        Body(.bodyA).Pos = Vec2ADDS(Body(.bodyA).Pos, .normal, -Body(.bodyA).invMass * correction)
-        Body(.bodyB).Pos = Vec2ADDS(Body(.bodyB).Pos, .normal, Body(.bodyB).invMass * correction)
+
+        Body(.bodyA).Pos = Vec2ADDScaled(Body(.bodyA).Pos, .normal, -Body(.bodyA).invMass * correction)
+        Body(.bodyB).Pos = Vec2ADDScaled(Body(.bodyB).Pos, .normal, Body(.bodyB).invMass * correction)
 
     End With
 
@@ -224,7 +227,7 @@ Public Sub contactsApplyImpulse(wC As Long)
                     ' j /= contactCount;
                     J = -(1 + .e) * contactVel
                     J = J / InvMassSUM
-                    J = J / .contactCount
+                    J = J * .invContactCount '/ .contactcount
 
                     ' // Apply impulse
                     ' Vec2 impulse = normal.mul( j );
@@ -258,7 +261,7 @@ Public Sub contactsApplyImpulse(wC As Long)
                     'jt /= contactCount;
                     Jt = -Vec2DOT(rV, T)
                     Jt = Jt / InvMassSUM
-                    Jt = Jt / .contactCount
+                    Jt = Jt * .invContactCount '/ .contactcount
 
 
                     '// Don    't apply tiny friction impulses
@@ -547,7 +550,6 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
 
     Dim Center As tVec2
 
-
     Dim separation As Double
     Dim faceNormal As Long
 
@@ -580,7 +582,7 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
     Dim refC As Double
     Dim posSide As Double
     Dim negSide As Double
-    Dim cp  As Long
+    Dim cp  As Double
 
 
     '---------------------------------------------------------------
@@ -618,6 +620,7 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
                 distance = Sqr(DistDist)
 
                 CollisionSOLVE.contactCount = 1
+                CollisionSOLVE.invContactCount = 1
 
                 If (distance = 0) Then
                     ' // m->penetration = A->radius;
@@ -659,12 +662,13 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
 
         Case 2    'PolygonCircle
 
-            CollisionSOLVE.bodyA = wbB
-            CollisionSOLVE.bodyB = wbA
-            A = Body(wbB)
-            B = Body(wbA)
+            CollisionSOLVE.bodyA = wbA
+            CollisionSOLVE.bodyB = wbB
+            A = Body(wbB) '*
+            B = Body(wbA) '*
             GoSub LABELCirclePolygon
-            'CollisionSOLVE.normal = Vec2Negative(CollisionSOLVE.normal)
+            CollisionSOLVE.normal = Vec2Negative(CollisionSOLVE.normal)
+
 
 
         Case 3    ' PolygonPolygon
@@ -760,6 +764,7 @@ LABELCirclePolygon:
     '}
     If separation < EPSILON Then
         CollisionSOLVE.contactCount = 1
+        CollisionSOLVE.invContactCount = 1
         'ReDim CollisionSOLVE.contactsPTS(1)
         CollisionSOLVE.normal = Vec2Negative(matMULv(B.U, B.normals(faceNormal)))
         CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.radius), A.Pos)
@@ -806,6 +811,7 @@ LABELCirclePolygon:
         If Vec2DISTANCEsq(Center, v1) < A.radius * A.radius Then
 
             CollisionSOLVE.contactCount = 1
+            CollisionSOLVE.invContactCount = 1
             'ReDim CollisionSOLVE.contactsPTS(1)
             N = Vec2SUB(v1, Center)
             CollisionSOLVE.normal = Vec2Normalize(matMULv(B.U, N))
@@ -838,6 +844,7 @@ LABELCirclePolygon:
         If Vec2DISTANCEsq(Center, v2) < A.radius * A.radius Then
 
             CollisionSOLVE.contactCount = 1
+            CollisionSOLVE.invContactCount = 1
             ' ReDim CollisionSOLVE.contactsPTS(1)
             N = Vec2SUB(v2, Center)
             v2 = Vec2ADD(matMULv(B.U, v2), B.Pos)
@@ -875,6 +882,7 @@ LABELCirclePolygon:
             N = matMULv(B.U, N)
             CollisionSOLVE.normal = Vec2Negative(N)
             CollisionSOLVE.contactCount = 1
+            CollisionSOLVE.invContactCount = 1
             ' ReDim CollisionSOLVE.contactsPTS(1)
             CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.radius), A.Pos)
         Else
@@ -1035,9 +1043,8 @@ LabelPolygonPolygon:
     '// Keep points behind reference face
     cp = 0
     separation = Vec2DOT(refFaceNormal, incidentFace(0)) - refC
-    If (separation <= 0#) Then
+    If (separation < 0#) Then
         cp = cp + 1
-
         CollisionSOLVE.contactsPTS(cp) = incidentFace(0)
         CollisionSOLVE.penetration = -separation
         CollisionSOLVE.contactCount = cp
@@ -1048,7 +1055,7 @@ LabelPolygonPolygon:
 
     'separation = Dot( refFaceNormal, incidentFace[1] ) - refC;
     separation = Vec2DOT(refFaceNormal, incidentFace(1)) - refC
-    If (separation <= 0) Then
+    If (separation < 0) Then
         cp = cp + 1
         CollisionSOLVE.contactsPTS(cp) = incidentFace(1)
         CollisionSOLVE.penetration = CollisionSOLVE.penetration - separation
@@ -1057,6 +1064,7 @@ LabelPolygonPolygon:
     End If
 
     CollisionSOLVE.contactCount = cp
+If cp Then CollisionSOLVE.invContactCount = 1# / cp
 
     Return
 
@@ -1128,7 +1136,6 @@ Private Function FindAxisLeastPenetration(faceIndex As Long, A As tBody, B As tB
         ' Vec2 n = A->m_normals[i];
         ' nw = A->u * n;
         N = A.normals(I)
-
         nw = matMULv(A.U, N)
 
         '// Transform face normal into B    's model space
@@ -1164,6 +1171,7 @@ Private Function FindAxisLeastPenetration(faceIndex As Long, A As tBody, B As tB
             bestIndex = I
         End If
     Next
+    
     FindAxisLeastPenetration = bestDistance
     faceIndex = bestIndex
 
@@ -1301,7 +1309,6 @@ Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     out(0) = face(0)
     out(1) = face(1)
 
-
     ' // Retrieve distances from each endpoint to the line
     ' // d = ax + by - c
     ' real d1 = Dot( n, face[0] ) - c;
@@ -1326,6 +1333,7 @@ Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     '  ++sp;
     '}
     If d1 * d2 < 0 Then
+
         ALPHA = d1 / (d1 - d2)
         out(sp) = Vec2ADD(face(0), Vec2MUL(Vec2SUB(face(1), face(0)), ALPHA))
         sp = sp + 1
@@ -1338,5 +1346,4 @@ Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     '    assert( sp != 3 );
     ''    If sp = 3 Then MsgBox "sp=3"
     Clip2 = sp
-
 End Function

@@ -17,6 +17,8 @@ Public TotalNContacts As Long
 
 Public Version As String
 
+Public DisplayRefreshPeriod As Long
+
 
 'Public DT As Double
 
@@ -53,7 +55,6 @@ Public Sub doSTEP()
 
             If (A.invMass <> 0 Or Body(J).invMass <> 0) Then
 
-
                 '                Manifold m = new Manifold( A, B );
                 '                m.solve();
                 '
@@ -68,7 +69,7 @@ Public Sub doSTEP()
                     If tmpContacts.contactCount > 0 Then
                         NofContactMainFolds = NofContactMainFolds + 1
                         If NofContactMainFolds > MAXNofContactMainFolds Then
-                            MAXNofContactMainFolds = NofContactMainFolds + 10
+                            MAXNofContactMainFolds = NofContactMainFolds + 20
                             ReDim Preserve Contacts(MAXNofContactMainFolds)
                         End If
 
@@ -83,7 +84,6 @@ Public Sub doSTEP()
         Next
     Next
 
-
     '  resolveJoints
 
     '// Integrate forces
@@ -94,8 +94,6 @@ Public Sub doSTEP()
     For I = 1 To NBodies
         integrateForces I    ', DT
     Next
-
-
 
 
     ''// Initialize collision
@@ -134,8 +132,6 @@ Public Sub doSTEP()
     For I = 1 To NBodies
         integrateVelocity I    ', DT
     Next
-
-
 
     '// Correct positions
     'for (int i = 0; i < contacts.size(); ++i)
@@ -361,7 +357,7 @@ Public Sub MAINLOOP()
         doSTEP
 
 
-        If CNT Mod 50 = 0 Then
+        If CNT Mod DisplayRefreshPeriod = 0 Then
 
             RENDERrc
             frmMain.PIC.Refresh

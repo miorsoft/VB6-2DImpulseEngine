@@ -46,9 +46,9 @@ Public Function Vec2MUL(V As tVec2, S As Double) As tVec2
     Vec2MUL.y = V.y * S
 End Function
 
-Public Function Vec2ADDS(v1 As tVec2, v2 As tVec2, S As Double) As tVec2
-    Vec2ADDS.X = v1.X + v2.X * S
-    Vec2ADDS.y = v1.y + v2.y * S
+Public Function Vec2ADDScaled(v1 As tVec2, v2 As tVec2, S As Double) As tVec2
+    Vec2ADDScaled.X = v1.X + v2.X * S
+    Vec2ADDScaled.y = v1.y + v2.y * S
 End Function
 
 Public Function Vec2LengthSq(V As tVec2) As Double

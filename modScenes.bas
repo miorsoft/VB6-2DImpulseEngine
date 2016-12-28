@@ -56,7 +56,7 @@ Public Sub CreateScene(Scene As Long)
 
         Case 1
 
-            CreateBox PicW * 0.9, 20, Vec2(PicW * 0.5, PicH - 15)
+            CreateBox Vec2(PicW * 0.5, PicH - 15), PicW * 0.9, 25
             BodySetStatic 1
 
             '-----------ROPE
@@ -73,39 +73,39 @@ Public Sub CreateScene(Scene As Long)
 
             CREATECircle Vec2(PicW * 0.75, PicH * 0.1), 7, DefDensity
             BodySetStatic NBodies
-            CreateBox 50, 20, Vec2(PicW * 0.75, PicH * 0.2)
+            CreateBox Vec2(PicW * 0.75, PicH * 0.2), 50, 20
             AddDistanceJoint NBodies, NBodies - 1, 100, 1, 0
         Case 2
 
 
-            CreateBox PicW * 0.9, 20, Vec2(PicW * 0.5, PicH - 15)
+            CreateBox Vec2(PicW * 0.5, PicH - 15), PicW * 0.9, 25
             BodySetStatic 1
 
-            CreateBox 100, 20, Vec2(PicW * 0.5, PicH * 0.5)
+            CreateBox Vec2(PicW * 0.5, PicH * 0.5), 100, 20
             AddPinJoint NBodies, Vec2(0, 0), 0
 
-            CreateBox 100, 20, Vec2(PicW * 0.25, PicH * 0.5)
+            CreateBox Vec2(PicW * 0.25, PicH * 0.5), 100, 20
             AddPinJoint NBodies, Vec2(-25, 0), 0
 
-            CreateBox 100, 20, Vec2(PicW * 0.75, PicH * 0.4)
+            CreateBox Vec2(PicW * 0.75, PicH * 0.4), 100, 20
             AddPinJoint NBodies, Vec2(-25, 0), 50
 
 
-            CreateBox 100, 20, Vec2(PicW * 0.9, PicH * 0.1)
+            CreateBox Vec2(PicW * 0.9, PicH * 0.1), 100, 20
             AddPinJoint NBodies, Vec2(-25, 0), 50, 0.005, 0.005
 
 
         Case 3
 
             'Floor
-            CreateBox PicW * 0.9, 20, Vec2(PicW * 0.5, PicH - 15)
+            CreateBox Vec2(PicW * 0.5, PicH - 15), PicW * 0.9, 25
             BodySetStatic 1
 
-            CreateBox 50, 20, Vec2(PicW * 0.1 + 20, PicH * 0.5)
+            CreateBox Vec2(PicW * 0.1 + 20, PicH * 0.5), 50, 20
             AddPinJoint NBodies, Vec2(-20, 0), 40, 0.01, 0
 
             For I = 1 To 5
-                CreateBox 50, 20, Vec2(PicW * 0.1 + 20 + 70 * I, PicH * 0.5)
+                CreateBox Vec2(PicW * 0.1 + 20 + 70 * I, PicH * 0.5), 50, 20
                 'AddPinJoint NBodies, Vec2(-20, 0), 40, 0.01, 0
                 Add2PinsJoint NBodies - 1, Vec2(20, 0), _
                               NBodies, Vec2(-20, 0), 30, 0.01, 0
@@ -113,25 +113,51 @@ Public Sub CreateScene(Scene As Long)
 
 
 
+
+
         Case 4
 
             'Floor
-            CreateBox PicW * 0.9, 20, Vec2(PicW * 0.5, PicH - 15)
+            CreateBox Vec2(PicW * 0.5, PicH - 15), PicW * 0.9, 25
             BodySetStatic 1
 
             'CreateBox 50, 20, Vec2(PicW * 0.1 + 20, PicH * 0.4)
             'AddPinJoint NBodies, Vec2(-20, 0), 40, 0.5, 0
-            CreateBox 50, 20, Vec2(PicW * 0.05 + 70 * 0, PicH * 0.4)
+            CreateBox Vec2(PicW * 0.05 + 70 * 0, PicH * 0.4), 50, 20
             BodySetStatic NBodies
 
             For I = 1 To 8
-                CreateBox 50, 20, Vec2(PicW * 0.05 + 70 * I, PicH * 0.4)
+                CreateBox Vec2(PicW * 0.05 + 70 * I, PicH * 0.4), 50, 20
                 Add2PinsJoint NBodies - 1, Vec2(20, 0), _
                               NBodies, Vec2(-20, 0), 30, 0.01, 0
             Next
 
             BodySetStatic NBodies
 
+        Case 5
+
+
+
+            CreateBox Vec2(PicW * 0.2, PicH * 0.45), PicW * 0.5, 25, PI * 0.25
+            BodySetStatic 1
+            CreateBox Vec2(PicW * 0.8, PicH * 0.45), PicW * 0.5, 25, PI * 0.75
+            BodySetStatic NBodies
+
+            CreateBox Vec2(PicW * 0.5, PicH * 0.75), 58, 22
+            AddPinJoint NBodies, Vec2(-25, 0), 0, 0.0006, 0.0006
+            AddPinJoint NBodies, Vec2(25, 0), 0, 0.0006, 0.0006
+
+
+        Case 6
+
+
+
+
+For I = 1 To 9
+            CreateBox Vec2((I - 0.5) * 82, PicH * 0.7), 58, 22
+            AddPinJoint NBodies, Vec2(-25, 0), 0, 0.0006, 0.0006
+            AddPinJoint NBodies, Vec2(25, 0), 0, 0.0006, 0.0006
+Next
 
 
     End Select

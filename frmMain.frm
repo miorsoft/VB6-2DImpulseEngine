@@ -19,17 +19,25 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   862
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton Command4 
+      Caption         =   "ADD Regular Poly"
+      Height          =   615
+      Left            =   11040
+      TabIndex        =   7
+      Top             =   4320
+      Width           =   975
+   End
    Begin VB.CheckBox chkJPG 
       Caption         =   "Save Jpg Frames"
       Height          =   495
       Left            =   11160
       TabIndex        =   6
-      Top             =   4560
+      Top             =   5520
       Width           =   1455
    End
    Begin VB.CommandButton Command3 
-      Caption         =   "add Brick"
-      Height          =   495
+      Caption         =   "ADD Brick"
+      Height          =   615
       Left            =   11040
       TabIndex        =   4
       Top             =   3480
@@ -41,14 +49,14 @@ Begin VB.Form frmMain
       Style           =   2  'Dropdown List
       TabIndex        =   3
       Top             =   1680
-      Width           =   1335
+      Width           =   1695
    End
    Begin VB.CommandButton Command2 
-      Caption         =   "add circle"
-      Height          =   495
+      Caption         =   "ADD circle"
+      Height          =   615
       Left            =   11040
       TabIndex        =   2
-      Top             =   2760
+      Top             =   2640
       Width           =   975
    End
    Begin VB.CommandButton Command1 
@@ -123,8 +131,12 @@ Private Sub Command3_Click()
 
 
 '    CREATERandomPoly Vec2(PicW \ 2, 0), DefDensity
-    CreateBox 60, 30, Vec2(PicW \ 2, 0)
+    CreateBox Vec2(PicW \ 2, 0), 60, 30
 
+End Sub
+
+Private Sub Command4_Click()
+    CreateRegularPoly Vec2(PicW \ 2, 0), 7 + Rnd * 30, 7 + Rnd * 30, 3 + Int(Rnd * 10), -Int(Rnd * 2), DefDensity
 End Sub
 
 Private Sub Form_Activate()
@@ -157,6 +169,9 @@ Private Sub Form_Load()
     cmbScene.AddItem "1 Pin Joints"
     cmbScene.AddItem "2 Pins Joints"
     cmbScene.AddItem "2 Pins Joints II"
+    cmbScene.AddItem "Slope"
+    cmbScene.AddItem "Gum Bridge"
+    
 
 
     cmbScene.ListIndex = 0

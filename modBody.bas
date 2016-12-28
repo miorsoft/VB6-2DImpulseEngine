@@ -304,7 +304,7 @@ Public Sub CREATERandomPoly(Pos As tVec2, Density As Double)
 End Sub
 
 
-Public Sub CreateBox(W As Double, H As Double, Pos As tVec2, Optional Ang As Double = 0)
+Public Sub CreateBox(Pos As tVec2, W As Double, H As Double, Optional Ang As Double = 0)
     Dim I   As Long
 
 
@@ -342,6 +342,51 @@ Public Sub CreateBox(W As Double, H As Double, Pos As tVec2, Optional Ang As Dou
 
 End Sub
 
+
+Public Sub CreateRegularPoly(Pos As tVec2, Rw As Double, Rh As Double, N As Long, Flat As Long, Density As Double)
+    Dim I   As Long
+    Dim A   As Double
+
+    NBodies = NBodies + 1
+    ReDim Preserve Body(NBodies)
+    With Body(NBodies)
+        .myType = ePolygon
+
+        .Pos = Pos
+        .staticFriction = GlobalSTATICFRICTION   '0.5
+        .dynamicFriction = GlobalDYNAMICFRICTION    '0.3
+        .Restitution = GlobalRestitution
+
+        .orient = 0
+        .color = RGB(100 + Rnd * 155, 100 + Rnd * 155, 100 + Rnd * 155)
+
+        .U = SetOrient(.orient)
+        .VEL = Vec2(0, 0)
+        .angularVelocity = 0
+
+        .Nvertex = N
+
+        ReDim .Vertex(.Nvertex)
+        ReDim .tVertex(.Nvertex)
+
+        If Flat Then A = 0.5 * PI2 / N
+
+        For I = 1 To .Nvertex
+            '        For I = .Nvertex To 1 Step -1
+            .Vertex(I) = Vec2ADD(Pos, _
+                                 Vec2((Rw) * Cos(A + PI2 * (I - 1) / .Nvertex), _
+                                      (Rh) * Sin(A + PI2 * (I - 1) / .Nvertex)))
+        Next
+
+    End With
+
+
+    POLYGONComputeFaceNormals NBodies
+    ComputeMass NBodies, Density
+    Body(NBodies).Pos = Body(NBodies).COM
+
+
+End Sub
 
 
 '  // The extreme point along a direction within a polygon
