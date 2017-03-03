@@ -19,6 +19,14 @@ Begin VB.Form frmMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   862
    StartUpPosition =   3  'Windows Default
+   Begin VB.CommandButton Command5 
+      Caption         =   "ADD Mini Chain"
+      Height          =   615
+      Left            =   11040
+      TabIndex        =   8
+      Top             =   5280
+      Width           =   975
+   End
    Begin VB.CommandButton Command4 
       Caption         =   "ADD Regular Poly"
       Height          =   615
@@ -32,7 +40,7 @@ Begin VB.Form frmMain
       Height          =   495
       Left            =   11160
       TabIndex        =   6
-      Top             =   5520
+      Top             =   6600
       Width           =   1455
    End
    Begin VB.CommandButton Command3 
@@ -115,16 +123,18 @@ End Sub
 
 Private Sub Command1_Click()
 
-
+    BiggerGroup = 0
     CreateScene frmMain.cmbScene.ListIndex
-
-
 
 
 End Sub
 
 Private Sub Command2_Click()
     CREATECircle Vec2(PicW * 0.5, 0), 5 + Rnd * 20, DefDensity
+
+    BodySetGroup NBodies, 1
+    BodySetCollideWith NBodies, ALL
+
 End Sub
 
 Private Sub Command3_Click()
@@ -132,11 +142,29 @@ Private Sub Command3_Click()
 
 '    CREATERandomPoly Vec2(PicW \ 2, 0), DefDensity
     CreateBox Vec2(PicW \ 2, 0), 60, 30
-
+    BodySetGroup NBodies, 1
+    BodySetCollideWith NBodies, ALL
 End Sub
 
 Private Sub Command4_Click()
-    CreateRegularPoly Vec2(PicW \ 2, 0), 7 + Rnd * 30, 7 + Rnd * 30, 3 + Int(Rnd * 10), -Int(Rnd * 2), DefDensity
+    CreateRegularPoly Vec2(PicW \ 2, 0), 12 + Rnd * 30, 12 + Rnd * 30, 3 + Int(Rnd * 10), -Int(Rnd * 2), DefDensity
+    BodySetGroup NBodies, 1
+    BodySetCollideWith NBodies, ALL
+End Sub
+
+Private Sub Command5_Click()
+    CreateBox Vec2(PicW * 0.5, 5), 80, 15
+    CreateBox Vec2(PicW * 0.5 + 70, 5), 80, 15
+    Add2PinsJoint NBodies - 1, Vec2(35, 0), NBodies, Vec2(-35, 0), 0, 1, 1
+
+    'Make last 2 bodies collide with All but each other
+    BodySetGroup NBodies - 1, BiggerGroup * 2
+    BodySetGroup NBodies, BiggerGroup * 2
+    BodySetCollideWith NBodies - 1, ALL - BiggerGroup
+    BodySetCollideWith NBodies, ALL - BiggerGroup \ 2
+
+
+
 End Sub
 
 Private Sub Form_Activate()
@@ -171,20 +199,20 @@ Private Sub Form_Load()
     cmbScene.AddItem "2 Pins Joints II"
     cmbScene.AddItem "Slope"
     cmbScene.AddItem "Gum Bridge"
+    cmbScene.AddItem "Car(Rotor)"
+    cmbScene.AddItem "Newton Cardle"
+    cmbScene.AddItem "(Rotor2)"
     
+    cmbScene.ListIndex = 1
 
-
-    cmbScene.ListIndex = 0
 
     Randomize Timer
     InitRC
 
-
-    CreateScene 0
+    CreateScene cmbScene.ListIndex
 
     Version = App.Major & "." & App.Minor & "." & App.Revision
     CreateIntroFrames
-
 
 End Sub
 

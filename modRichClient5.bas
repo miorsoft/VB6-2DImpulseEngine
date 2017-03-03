@@ -11,12 +11,12 @@ Option Explicit
 Public Srf As cCairoSurface, CC As cCairoContext    'Srf is similar to a DIB, the derived CC similar to a hDC
 Attribute CC.VB_VarUserMemId = 1073741824
 
-Public vbDRAW As cVBDraw
+Public vbDRAW  As cVBDraw
 Attribute vbDRAW.VB_VarUserMemId = 1073741826
-Public CONS As cConstructor
+Public CONS    As cConstructor
 Attribute CONS.VB_VarUserMemId = 1610809344
 
-Public PicHDC As Long
+Public PicHDC  As Long
 Attribute PicHDC.VB_VarUserMemId = 1073741828
 
 Public Const JPGQuality As Long = 95
@@ -106,19 +106,19 @@ Public Sub CreateOuttroFrames()
 
 End Sub
 Private Sub StringOut(S As String)
-    Dim I   As Double
-    Const sstep As Double = 3
-    Static y As Double
-    Dim S2  As String
+    Dim I      As Single
+    Const sStep As Single = 12 '20    ' 3
+    Static y   As Single
+    Dim S2     As String
 
     Do
         S = S & " "
-    Loop While (Len(S) - 1) Mod sstep <> 0
+    Loop While (Len(S) - 1) Mod sStep <> 0
 
     S2 = S
 
-    For I = 1 To Len(S2) Step sstep
-        vbDRAW.CC.TextOut 10 + I * 7, y, Mid$(S, I, sstep)
+    For I = 1 To Len(S2) Step sStep
+        vbDRAW.CC.TextOut 10 + I * 7, y, Mid$(S, I, sStep)
         vbDRAW.Srf.WriteContentToJpgFile App.Path & "\Frames\" & Format(Frame, "00000") & ".jpg", JPGQuality
         Frame = Frame + 1
     Next
@@ -128,20 +128,20 @@ Private Sub StringOut(S As String)
 
 End Sub
 Public Sub RENDERrc()
-    Dim x1  As Long
-    Dim y1  As Long
-    Dim x2  As Long
-    Dim y2  As Long
+    Dim x1     As Long
+    Dim y1     As Long
+    Dim x2     As Long
+    Dim y2     As Long
 
-    Dim x1d As Double
-    Dim y1d As Double
-    Dim x2d As Double
-    Dim y2d As Double
+    Dim x1d    As Single
+    Dim y1d    As Single
+    Dim x2d    As Single
+    Dim y2d    As Single
 
 
-    Dim I   As Long
-    Dim J   As Long
-    Dim JJ  As Long
+    Dim I      As Long
+    Dim J      As Long
+    Dim JJ     As Long
 
 
     vbDRAW.CC.SetSourceColor 0
@@ -154,15 +154,15 @@ Public Sub RENDERrc()
         With Body(I)
 
             If .myType = eCircle Then
-                x1 = .Pos.X
+                x1 = .Pos.x
                 y1 = .Pos.y
 
                 vbDRAW.CC.SetSourceColor .color
-                vbDRAW.CC.Ellipse x1, y1, .radius * 2, .radius * 2
+                vbDRAW.CC.Ellipse x1, y1, .Radius * 2, .Radius * 2
                 vbDRAW.CC.Fill
 
-                x2 = x1 + .radius * Cos(.orient)
-                y2 = y1 + .radius * Sin(.orient)
+                x2 = x1 + .Radius * Cos(.orient)
+                y2 = y1 + .Radius * Sin(.orient)
 
                 vbDRAW.CC.DrawLine x1, y1, x2, y2, , , 0, 0.25
 
@@ -182,11 +182,11 @@ Public Sub RENDERrc()
                 '''' FILL
                 vbDRAW.CC.SetSourceColor .color
 
-                x1 = .tVertex(1).X + .Pos.X
+                x1 = .tVertex(1).x + .Pos.x
                 y1 = .tVertex(1).y + .Pos.y
                 vbDRAW.CC.MoveTo x1, y1
                 For J = 2 To .Nvertex
-                    x1 = .tVertex(J).X + .Pos.X
+                    x1 = .tVertex(J).x + .Pos.x
                     y1 = .tVertex(J).y + .Pos.y
                     '                    JJ = J + 1: If JJ > .Nvertex Then JJ = 1
                     '                    x2 = .tVertex(JJ).X + .Pos.X
@@ -195,11 +195,12 @@ Public Sub RENDERrc()
                 Next
                 vbDRAW.CC.Fill
 
+
                 vbDRAW.CC.SetSourceColor 0, 0.25
-                vbDRAW.CC.Ellipse .Pos.X, .Pos.y, 3, 3
+                vbDRAW.CC.Ellipse .Pos.x, .Pos.y, 3, 3
                 vbDRAW.CC.Fill
 
-                If .Nvertex > 4 Then vbDRAW.CC.DrawLine x1, y1, .Pos.X, .Pos.y, , , 0, 0.25
+                If .Nvertex > 4 Then vbDRAW.CC.DrawLine x1, y1, .Pos.x, .Pos.y, , , 0, 0.25
 
             End If
 
@@ -241,30 +242,38 @@ Public Sub RENDERrc()
         With Joints(I)
             Select Case .JointType
 
-                Case JointDistance
-                    x1 = Body(.bA).Pos.X
-                    y1 = Body(.bA).Pos.y
-                    x2 = Body(.bB).Pos.X
-                    y2 = Body(.bB).Pos.y
-                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+            Case JointDistance
+                x1 = Body(.bA).Pos.x
+                y1 = Body(.bA).Pos.y
+                x2 = Body(.bB).Pos.x
+                y2 = Body(.bB).Pos.y
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
 
 
-                Case Joint2Pins
-                    x1 = Body(.bA).Pos.X + .tAnchA.X
-                    y1 = Body(.bA).Pos.y + .tAnchA.y
-                    x2 = Body(.bB).Pos.X + .tAnchB.X
-                    y2 = Body(.bB).Pos.y + .tAnchB.y
-                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+            Case Joint2Pins
+                x1 = Body(.bA).Pos.x + .tAnchA.x
+                y1 = Body(.bA).Pos.y + .tAnchA.y
+                x2 = Body(.bB).Pos.x + .tAnchB.x
+                y2 = Body(.bB).Pos.y + .tAnchB.y
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
 
-                Case JointPin
-                    x1 = .AnchB.X
-                    y1 = .AnchB.y
-                    x2 = Body(.bA).Pos.X + .tAnchA.X
-                    y2 = Body(.bA).Pos.y + .tAnchA.y
-                    vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
-                    vbDRAW.CC.SetSourceColor vbRed, 0.5
-                    vbDRAW.CC.Ellipse x1, y1, 5, 5
-                    vbDRAW.CC.Fill
+            Case JointPin
+                x1 = .AnchB.x
+                y1 = .AnchB.y
+                x2 = Body(.bA).Pos.x + .tAnchA.x
+                y2 = Body(.bA).Pos.y + .tAnchA.y
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 5, vbBlue, 0.5
+                vbDRAW.CC.SetSourceColor vbRed, 0.5
+                vbDRAW.CC.Ellipse x1, y1, 5, 5
+                vbDRAW.CC.Fill
+                
+                        Case Rotor2
+                x1 = Body(.bA).Pos.x '+ .tAnchA.x
+                y1 = Body(.bA).Pos.y '+ .tAnchA.y
+                x2 = Body(.bB).Pos.x '+ .tAnchB.x
+                y2 = Body(.bB).Pos.y '+ .tAnchB.y
+                vbDRAW.CC.DrawLine x1, y1, x2, y2, , 3, vbBlue, 0.5
+            
             End Select
 
         End With

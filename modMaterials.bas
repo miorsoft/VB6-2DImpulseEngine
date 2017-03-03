@@ -12,10 +12,10 @@ Public Enum eMat
 End Enum
 
 Public Type tMaterial
-    SF      As Double
-    DF      As Double
-    Restitution As Double
-    Density As Double
+    SF         As Single
+    DF         As Single
+    Restitution As Single
+    Density    As Single
 End Type
 
 

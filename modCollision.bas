@@ -13,21 +13,21 @@ Public Type tManifold
 
     ContactType As eCollision
 
-    bodyA   As Long
-    bodyB   As Long
+    bodyA      As Long
+    bodyB      As Long
 
-    penetration As Double
-    normal  As tVec2
+    penetration As Single
+    normal     As tVec2
 
     contactsPTS(1 To 2) As tVec2
     contactCount As Long
-    invContactCount As Double
-    
+    invContactCount As Single
+
     MAXcontactCount As Long
 
-    e       As Double
-    DF      As Double
-    SF      As Double
+    e          As Single
+    DF         As Single
+    SF         As Single
 
 End Type
 
@@ -36,15 +36,16 @@ Public Contacts() As tManifold
 Public NofContactMainFolds As Long
 Public MAXNofContactMainFolds As Long
 
-
+Public BiggerGroup As Long
+Public Const ALL As Long = &HFFFFFFFF
 
 Public Sub ContactsINIT(wC As Long)
-    Dim I   As Long
-    Dim rA  As tVec2
-    Dim rB  As tVec2
-    Dim rV  As tVec2
-    Dim A   As Long
-    Dim B   As Long
+    Dim I      As Long
+    Dim rA     As tVec2
+    Dim rB     As tVec2
+    Dim rV     As tVec2
+    Dim A      As Long
+    Dim B      As Long
 
 
     With Contacts(wC)
@@ -95,7 +96,7 @@ Public Sub ContactsINIT(wC As Long)
             '            {
             '            e = 0.0f;
             '            }
-            
+
             If Vec2LengthSq(rV) < RESTING Then .e = 0
         Next
 
@@ -108,7 +109,7 @@ Public Sub infiniteMassCorrection(wC As Long)
     Body(Contacts(wC).bodyB).VEL = Vec2(0, 0)
 End Sub
 Public Sub contactsPositionalCorrection(wC As Long)
-    Dim correction As Double
+    Dim correction As Single
 
     '// const real k_slop = 0.05f; // Penetration allowance
     '// const real percent = 0.4f; // Penetration percentage to correct
@@ -127,34 +128,35 @@ Public Sub contactsPositionalCorrection(wC As Long)
         correction = (Max(.penetration - PENETRATION_ALLOWANCE, 0) / (Body(.bodyA).invMass + Body(.bodyB).invMass)) _
                      * PENETRATION_CORRETION
 
-
-        Body(.bodyA).Pos = Vec2ADDScaled(Body(.bodyA).Pos, .normal, -Body(.bodyA).invMass * correction)
-        Body(.bodyB).Pos = Vec2ADDScaled(Body(.bodyB).Pos, .normal, Body(.bodyB).invMass * correction)
+        If correction Then
+            Body(.bodyA).Pos = Vec2ADDScaled(Body(.bodyA).Pos, .normal, -Body(.bodyA).invMass * correction)
+            Body(.bodyB).Pos = Vec2ADDScaled(Body(.bodyB).Pos, .normal, Body(.bodyB).invMass * correction)
+        End If
 
     End With
 
 End Sub
 Public Sub contactsApplyImpulse(wC As Long)
-    Dim A   As Long
-    Dim B   As Long
+    Dim A      As Long
+    Dim B      As Long
 
-    Dim I   As Long
+    Dim I      As Long
 
-    Dim rA  As tVec2
-    Dim rB  As tVec2
-    Dim rV  As tVec2
-    Dim contactVel As Double
+    Dim rA     As tVec2
+    Dim rB     As tVec2
+    Dim rV     As tVec2
+    Dim contactVel As Single
 
 
-    Dim rACrossN As Double
-    Dim rBCrossN As Double
-    Dim InvMassSUM As Double
-    Dim J   As Double
-    Dim Jt  As Double
+    Dim rACrossN As Single
+    Dim rBCrossN As Single
+    Dim InvMassSUM As Single
+    Dim J      As Single
+    Dim Jt     As Single
 
 
     Dim impulse As tVec2
-    Dim T   As tVec2
+    Dim T      As tVec2
 
     Dim tangentImpulse As tVec2
 
@@ -201,7 +203,6 @@ Public Sub contactsApplyImpulse(wC As Long)
                 'float contactVel = Vec2.dot( rv, normal );
                 contactVel = Vec2DOT(rV, .normal)
 
-
                 '// Do not resolve if velocities are separating
                 'if (contactVel > 0)
                 '{
@@ -227,7 +228,7 @@ Public Sub contactsApplyImpulse(wC As Long)
                     ' j /= contactCount;
                     J = -(1 + .e) * contactVel
                     J = J / InvMassSUM
-                    J = J * .invContactCount '/ .contactcount
+                    J = J * .invContactCount    '/ .contactcount
 
                     ' // Apply impulse
                     ' Vec2 impulse = normal.mul( j );
@@ -243,7 +244,6 @@ Public Sub contactsApplyImpulse(wC As Long)
                     '          // A->velocity - Cross( A->angularVelocity, ra );
                     '          rv = B.velocity.add( Vec2.cross( B.angularVelocity, rb, new Vec2() ) ).subi( A.velocity ).subi( Vec2.cross( A.angularVelocity, ra, new Vec2() ) );
                     rV = Vec2ADD(Body(B).VEL, Vec2CROSSav(Body(B).angularVelocity, rB))
-
                     rV = Vec2SUB(rV, Body(A).VEL)
                     rV = Vec2SUB(rV, Vec2CROSSav(Body(A).angularVelocity, rA))
 
@@ -261,7 +261,7 @@ Public Sub contactsApplyImpulse(wC As Long)
                     'jt /= contactCount;
                     Jt = -Vec2DOT(rV, T)
                     Jt = Jt / InvMassSUM
-                    Jt = Jt * .invContactCount '/ .contactcount
+                    Jt = Jt * .invContactCount    '/ .contactcount
 
 
                     '// Don    't apply tiny friction impulses
@@ -319,26 +319,26 @@ End Sub
 '    Dim B      As tBody
 '
 '    Dim normal As tVec2
-'    Dim DistDist As Double
-'    Dim radius As Double
-'    Dim distance As Double
+'    Dim DistDist As single
+'    Dim radius As single
+'    Dim distance As single
 '
 '    Dim center As tVec2
 '
 '
-'    Dim separation As Double
+'    Dim separation As single
 '    Dim faceNormal As Long
 '
 '    Dim I      As Long
 '    Dim I2     As Long
 '
-'    Dim S      As Double
+'    Dim S      As single
 '
 '    Dim v1     As tVec2
 '    Dim v2     As tVec2
 '
-'    Dim Dot1   As Double
-'    Dim Dot2   As Double
+'    Dim Dot1   As single
+'    Dim Dot2   As single
 '
 '    Dim N      As tVec2
 '
@@ -540,49 +540,49 @@ End Sub
 
 
 Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
-    Dim A   As tBody
-    Dim B   As tBody
+    Dim A      As tBody
+    Dim B      As tBody
 
     Dim normal As tVec2
-    Dim DistDist As Double
-    Dim radius As Double
-    Dim distance As Double
+    Dim DistDist As Single
+    Dim Radius As Single
+    Dim distance As Single
 
     Dim Center As tVec2
 
-    Dim separation As Double
+    Dim separation As Single
     Dim faceNormal As Long
 
-    Dim I   As Long
-    Dim I2  As Long
+    Dim I      As Long
+    Dim I2     As Long
 
-    Dim S   As Double
+    Dim S      As Single
 
-    Dim v1  As tVec2
-    Dim v2  As tVec2
+    Dim v1     As tVec2
+    Dim v2     As tVec2
 
-    Dim Dot1 As Double
-    Dim Dot2 As Double
+    Dim Dot1   As Single
+    Dim Dot2   As Single
 
-    Dim N   As tVec2
+    Dim N      As tVec2
 
     Dim ContactType As Long
 
-    Dim faceA As Long    '---------------polypoly
-    Dim faceB As Long
-    Dim penetrationA As Double
-    Dim penetrationB As Double
-    Dim flip As Boolean
+    Dim faceA  As Long    '---------------polypoly
+    Dim faceB  As Long
+    Dim penetrationA As Single
+    Dim penetrationB As Single
+    Dim flip   As Boolean
     Dim RefPoly As tBody
     Dim IncPoly As tBody
     Dim incidentFace(0 To 1) As tVec2
     Dim referenceIndex As Long
     Dim sidePlaneNormal As tVec2
     Dim refFaceNormal As tVec2
-    Dim refC As Double
-    Dim posSide As Double
-    Dim negSide As Double
-    Dim cp  As Double
+    Dim refC   As Single
+    Dim posSide As Single
+    Dim negSide As Single
+    Dim cp     As Single
 
 
     '---------------------------------------------------------------
@@ -592,93 +592,93 @@ Public Function CollisionSOLVE(wbA As Long, wbB As Long) As tManifold
 
     Select Case ContactType
 
-        Case 0    'CircleCircle
+    Case 0    'CircleCircle
 
-            '*******************************************************************************
-            '*******************************************************************************
-            CollisionSOLVE.bodyA = wbA
-            CollisionSOLVE.bodyB = wbB
-            A = Body(wbA)
-            B = Body(wbB)
+        '*******************************************************************************
+        '*******************************************************************************
+        CollisionSOLVE.bodyA = wbA
+        CollisionSOLVE.bodyB = wbB
+        A = Body(wbA)
+        B = Body(wbB)
 
-            '        // Calculate translational vector, which is normal
-            '        // Vec2 normal = b->position - a->position;
-            '        Vec2 normal = b.position.sub( a.position );
-            normal = Vec2SUB(B.Pos, A.Pos)
-            '        // real DistDist = normal.LenSqr( );
-            '        // real radius = A->radius + B->radius;
-            '        float DistDist = normal.lengthSq();
-            '        float radius = A.radius + B.radius;
-            DistDist = Vec2LengthSq(normal)
-            radius = A.radius + B.radius
+        '        // Calculate translational vector, which is normal
+        '        // Vec2 normal = b->position - a->position;
+        '        Vec2 normal = b.position.sub( a.position );
+        normal = Vec2SUB(B.Pos, A.Pos)
+        '        // real DistDist = normal.LenSqr( );
+        '        // real radius = A->radius + B->radius;
+        '        float DistDist = normal.lengthSq();
+        '        float radius = A.radius + B.radius;
+        DistDist = Vec2LengthSq(normal)
+        Radius = A.Radius + B.Radius
 
-            '        // Not in contact
-            If (DistDist >= radius * radius) Then
-                CollisionSOLVE.contactCount = 0
+        '        // Not in contact
+        If (DistDist >= Radius * Radius) Then
+            CollisionSOLVE.contactCount = 0
+        Else
+
+            distance = Sqr(DistDist)
+
+            CollisionSOLVE.contactCount = 1
+            CollisionSOLVE.invContactCount = 1
+
+            If (distance = 0) Then
+                ' // m->penetration = A->radius;
+                ' // m->normal = Vec2( 1, 0 );
+                ' // m->contacts [0] = a->position;
+                ' m.penetration = A.radius;
+                ' m.normal.set( 1.0f, 0.0f );
+                ' m.contacts[0].set( a.position );
+                CollisionSOLVE.penetration = A.Radius
+                CollisionSOLVE.normal.x = 1
+                CollisionSOLVE.normal.y = 0
+                'ReDim CollisionSOLVE.contactsPTS(1)
+                CollisionSOLVE.contactsPTS(1) = A.Pos
+
             Else
-
-                distance = Sqr(DistDist)
-
-                CollisionSOLVE.contactCount = 1
-                CollisionSOLVE.invContactCount = 1
-
-                If (distance = 0) Then
-                    ' // m->penetration = A->radius;
-                    ' // m->normal = Vec2( 1, 0 );
-                    ' // m->contacts [0] = a->position;
-                    ' m.penetration = A.radius;
-                    ' m.normal.set( 1.0f, 0.0f );
-                    ' m.contacts[0].set( a.position );
-                    CollisionSOLVE.penetration = A.radius
-                    CollisionSOLVE.normal.X = 1
-                    CollisionSOLVE.normal.y = 0
-                    'ReDim CollisionSOLVE.contactsPTS(1)
-                    CollisionSOLVE.contactsPTS(1) = A.Pos
-
-                Else
-                    '// m->penetration = radius - distance;
-                    '// m->normal = normal / distance; // Faster than using Normalized since
-                    '// we already performed sqrt
-                    '// m->contacts[0] = m->normal * A->radius + a->position;
-                    'm.penetration = radius - distance;
-                    'm.normal.set( normal ).divi( distance );
-                    'm.contacts[0].set( m.normal ).muli( A.radius ).addi( a.position );
-                    CollisionSOLVE.penetration = radius - distance
-                    CollisionSOLVE.normal = Vec2MUL(normal, 1 / distance)
-                    'ReDim CollisionSOLVE.contactsPTS(1)
-                    CollisionSOLVE.contactsPTS(1) = Vec2ADD(A.Pos, Vec2MUL(CollisionSOLVE.normal, A.radius))
-                End If
-
+                '// m->penetration = radius - distance;
+                '// m->normal = normal / distance; // Faster than using Normalized since
+                '// we already performed sqrt
+                '// m->contacts[0] = m->normal * A->radius + a->position;
+                'm.penetration = radius - distance;
+                'm.normal.set( normal ).divi( distance );
+                'm.contacts[0].set( m.normal ).muli( A.radius ).addi( a.position );
+                CollisionSOLVE.penetration = Radius - distance
+                CollisionSOLVE.normal = Vec2MUL(normal, 1 / distance)
+                'ReDim CollisionSOLVE.contactsPTS(1)
+                CollisionSOLVE.contactsPTS(1) = Vec2ADD(A.Pos, Vec2MUL(CollisionSOLVE.normal, A.Radius))
             End If
 
-
-        Case 1    ' CirclePolygon
-            CollisionSOLVE.bodyA = wbA
-            CollisionSOLVE.bodyB = wbB
-            A = Body(wbA)
-            B = Body(wbB)
-            GoSub LABELCirclePolygon
+        End If
 
 
-        Case 2    'PolygonCircle
-
-            CollisionSOLVE.bodyA = wbA
-            CollisionSOLVE.bodyB = wbB
-            A = Body(wbB) '*
-            B = Body(wbA) '*
-            GoSub LABELCirclePolygon
-            CollisionSOLVE.normal = Vec2Negative(CollisionSOLVE.normal)
+    Case 1    ' CirclePolygon
+        CollisionSOLVE.bodyA = wbA
+        CollisionSOLVE.bodyB = wbB
+        A = Body(wbA)
+        B = Body(wbB)
+        GoSub LABELCirclePolygon
 
 
+    Case 2    'PolygonCircle
 
-        Case 3    ' PolygonPolygon
-            '*******************************************************************************
-            '*******************************************************************************
-            CollisionSOLVE.bodyA = wbA
-            CollisionSOLVE.bodyB = wbB
-            A = Body(wbA)
-            B = Body(wbB)
-            GoSub LabelPolygonPolygon
+        CollisionSOLVE.bodyA = wbA
+        CollisionSOLVE.bodyB = wbB
+        A = Body(wbB)    '*
+        B = Body(wbA)    '*
+        GoSub LABELCirclePolygon
+        CollisionSOLVE.normal = Vec2Negative(CollisionSOLVE.normal)
+
+
+
+    Case 3    ' PolygonPolygon
+        '*******************************************************************************
+        '*******************************************************************************
+        CollisionSOLVE.bodyA = wbA
+        CollisionSOLVE.bodyB = wbB
+        A = Body(wbA)
+        B = Body(wbB)
+        GoSub LabelPolygonPolygon
 
     End Select
 
@@ -722,7 +722,7 @@ LABELCirclePolygon:
         '      separation = s;
         '      faceNormal = i;
         '    }
-        If (S <= A.radius) Then
+        If (S <= A.Radius) Then
             If (S > separation) Then
                 separation = S
                 faceNormal = I
@@ -767,8 +767,8 @@ LABELCirclePolygon:
         CollisionSOLVE.invContactCount = 1
         'ReDim CollisionSOLVE.contactsPTS(1)
         CollisionSOLVE.normal = Vec2Negative(matMULv(B.U, B.normals(faceNormal)))
-        CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.radius), A.Pos)
-        CollisionSOLVE.penetration = A.radius
+        CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.Radius), A.Pos)
+        CollisionSOLVE.penetration = A.Radius
         Return
         'Else    'because of return
     End If
@@ -783,7 +783,7 @@ LABELCirclePolygon:
 
     Dot1 = Vec2DOT(Vec2SUB(Center, v1), Vec2SUB(v2, v1))
     Dot2 = Vec2DOT(Vec2SUB(Center, v2), Vec2SUB(v1, v2))
-    CollisionSOLVE.penetration = A.radius - separation
+    CollisionSOLVE.penetration = A.Radius - separation
 
 
     '        // Closest to v1
@@ -808,7 +808,7 @@ LABELCirclePolygon:
     '        }
     If Dot1 <= 0 Then
 
-        If Vec2DISTANCEsq(Center, v1) < A.radius * A.radius Then
+        If Vec2DISTANCEsq(Center, v1) < A.Radius * A.Radius Then
 
             CollisionSOLVE.contactCount = 1
             CollisionSOLVE.invContactCount = 1
@@ -841,7 +841,7 @@ LABELCirclePolygon:
         '                B.u.muli( m.normal.set( v2 ).subi( center ) ).normalize();
         '                B.u.mul( v2, m.contacts[0] ).addi( b.position );
         '                }
-        If Vec2DISTANCEsq(Center, v2) < A.radius * A.radius Then
+        If Vec2DISTANCEsq(Center, v2) < A.Radius * A.Radius Then
 
             CollisionSOLVE.contactCount = 1
             CollisionSOLVE.invContactCount = 1
@@ -877,14 +877,14 @@ LABELCirclePolygon:
 
 
         N = B.normals(faceNormal)
-        If Vec2DOT(Vec2SUB(Center, v1), N) < A.radius Then
+        If Vec2DOT(Vec2SUB(Center, v1), N) < A.Radius Then
 
             N = matMULv(B.U, N)
             CollisionSOLVE.normal = Vec2Negative(N)
             CollisionSOLVE.contactCount = 1
             CollisionSOLVE.invContactCount = 1
             ' ReDim CollisionSOLVE.contactsPTS(1)
-            CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.radius), A.Pos)
+            CollisionSOLVE.contactsPTS(1) = Vec2ADD(Vec2MUL(CollisionSOLVE.normal, A.Radius), A.Pos)
         Else
             Return
 
@@ -967,8 +967,8 @@ LabelPolygonPolygon:
     '  // Orthogonalize
     '  Vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
     sidePlaneNormal = Vec2Normalize(Vec2SUB(v2, v1))
-    refFaceNormal.X = sidePlaneNormal.y
-    refFaceNormal.y = -sidePlaneNormal.X
+    refFaceNormal.x = sidePlaneNormal.y
+    refFaceNormal.y = -sidePlaneNormal.x
 
 
 
@@ -1064,7 +1064,7 @@ LabelPolygonPolygon:
     End If
 
     CollisionSOLVE.contactCount = cp
-If cp Then CollisionSOLVE.invContactCount = 1# / cp
+    If cp Then CollisionSOLVE.invContactCount = 1# / cp
 
     Return
 
@@ -1080,7 +1080,7 @@ End Function
 
 'Real FindAxisLeastPenetration(uint32 * faceIndex, PolygonShape * A, PolygonShape * B)
 '{
-'  real bestDistance = -FLT_MAX;
+'  real bestDistance = -MAX_VALUE;
 '  uint32 bestIndex;
 '
 '  for(uint32 i = 0; i < A->m_vertexCount; ++i)
@@ -1113,22 +1113,22 @@ End Function
 '      bestIndex = i;
 '    }
 '  }
-Private Function FindAxisLeastPenetration(faceIndex As Long, A As tBody, B As tBody) As Double
-    Dim I   As Long
+Private Function FindAxisLeastPenetration(faceIndex As Long, A As tBody, B As tBody) As Single
+    Dim I      As Long
 
     Dim bestIndex As Long
-    Dim bestDistance As Double
+    Dim bestDistance As Single
 
 
-    Dim N   As tVec2
-    Dim nw  As tVec2
-    Dim buT As tMAT2
-    Dim S   As tVec2
-    Dim V   As tVec2
-    Dim D   As Double
+    Dim N      As tVec2
+    Dim nw     As tVec2
+    Dim buT    As tMAT2
+    Dim S      As tVec2
+    Dim V      As tVec2
+    Dim D      As Single
 
 
-    bestDistance = -FLT_MAX
+    bestDistance = -MAX_VALUE
 
     For I = 1 To A.Nvertex
 
@@ -1171,7 +1171,7 @@ Private Function FindAxisLeastPenetration(faceIndex As Long, A As tBody, B As tB
             bestIndex = I
         End If
     Next
-    
+
     FindAxisLeastPenetration = bestDistance
     faceIndex = bestIndex
 
@@ -1188,7 +1188,7 @@ End Function
 '
 '  // Find most anti-normal face on incident polygon
 '  int32 incidentFace = 0;
-'  real minDot = FLT_MAX;
+'  real minDot = MAX_VALUE;
 '  for(uint32 i = 0; i < IncPoly->m_vertexCount; ++i)
 '  {
 '    real dot = Dot( referenceNormal, IncPoly->m_normals[i] );
@@ -1208,9 +1208,9 @@ Private Sub FindIncidentFace(V() As tVec2, RefPoly As tBody, IncPoly As tBody, r
 
     Dim referenceNormal As tVec2
     Dim incidentFace As Long
-    Dim I   As Long
-    Dim dot As Double
-    Dim minDot As Double
+    Dim I      As Long
+    Dim dot    As Single
+    Dim minDot As Single
 
     'Vec2 referenceNormal = RefPoly->m_normals[referenceIndex];
     referenceNormal = RefPoly.normals(referenceIndex)
@@ -1233,7 +1233,7 @@ Private Sub FindIncidentFace(V() As tVec2, RefPoly As tBody, IncPoly As tBody, r
     '    }
     '  }
     incidentFace = 0
-    minDot = FLT_MAX
+    minDot = MAX_VALUE
     For I = 1 To IncPoly.Nvertex
         dot = Vec2DOT(referenceNormal, IncPoly.normals(I))
         If (dot < minDot) Then
@@ -1294,12 +1294,12 @@ End Sub
 
 
 
-Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
-    Dim sp  As Long
+Private Function Clip2(N As tVec2, C As Single, face() As tVec2) As Long
+    Dim sp     As Long
     Dim out(0 To 1) As tVec2
-    Dim d1  As Double
-    Dim d2  As Double
-    Dim ALPHA As Double
+    Dim d1     As Single
+    Dim d2     As Single
+    Dim alpha  As Single
 
     '  uint32 sp = 0;
     '  Vec2 out[2] = {
@@ -1334,8 +1334,8 @@ Private Function Clip2(N As tVec2, C As Double, face() As tVec2) As Long
     '}
     If d1 * d2 < 0 Then
 
-        ALPHA = d1 / (d1 - d2)
-        out(sp) = Vec2ADD(face(0), Vec2MUL(Vec2SUB(face(1), face(0)), ALPHA))
+        alpha = d1 / (d1 - d2)
+        out(sp) = Vec2ADD(face(0), Vec2MUL(Vec2SUB(face(1), face(0)), alpha))
         sp = sp + 1
     End If
 
